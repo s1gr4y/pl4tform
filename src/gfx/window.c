@@ -128,7 +128,8 @@ int Window_init(int wid, int high, char* title) {
     // load image, create texture and generate mipmaps
     int width, height, nrChannels;
     // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-    unsigned char *data = stbi_load("C:/Users/russa/Desktop/coding_projs/glfwGame/imgs/container.jpg", &width, &height, &nrChannels, 0);
+    //C:/Users/russa/Desktop/coding_projs/glfwGame/imgs/container.jpg
+    unsigned char *data = stbi_load("Resources/Textures/container.jpg", &width, &height, &nrChannels, 0);
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -136,7 +137,7 @@ int Window_init(int wid, int high, char* title) {
 	    printf("Failed to load texture\n");
 	}
 	stbi_image_free(data);
-
+	//
 	char path[200];
 	getcwd(path, 200);
 	printf("Current working directory: %s\n", path);
