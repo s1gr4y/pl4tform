@@ -7,10 +7,11 @@ const char *vertexShaderSource =
 	"layout (location = 2) in vec2 aTexCoord;\n"
 	"out vec4 vertexCol;\n"
 	"out vec2 TexCoord;\n"
+	"uniform mat4 transform;\n"
     "void main()\n"
     "{\n"
 	"	vertexCol = vec4(aCol.r, aCol.g, aCol.b, aCol.a);\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n" //vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
 	"   TexCoord = aTexCoord;\n"
     "}\0";
 
@@ -19,12 +20,15 @@ const char *fragmentShaderSource =
     "out vec4 FragColor;\n"
 	"in vec4 vertexCol;\n"
 	"in vec2 TexCoord;\n"
-	"uniform sampler2D ourTexture;\n"
+	//"uniform sampler2D ourTexture;\n"
+	"uniform sampler2D texture1;\n"
+	"uniform sampler2D texture2;\n"
     "void main()\n"
     "{\n"
     //"   FragColor = vertexCol;\n"						//only color
-	"	FragColor = texture(ourTexture, TexCoord);\n"	//just texture
+	//"	FragColor = texture(ourTexture, TexCoord);\n"	//just texture
 	//"	FragColor = texture(ourTexture, TexCoord) * vec4(vertexCol);\n"	//add rgb
+	"	FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.4);\n"
     "}\n\0";
 
 void loadShaders(const char* vsSource, const char* fsSource) {

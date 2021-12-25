@@ -22,6 +22,7 @@ struct Window {
 
 int Window_init(int wid, int high, char* title);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void generateTexture(unsigned int* txtIndex, const char* file_name);
 void window_loop();
 
 // global window
