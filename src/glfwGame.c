@@ -4,7 +4,7 @@
 #include "gfx/window.h"
 
 int main(void) {
-	if (!Window_init(1280, 720, "GLFW/OPENGL PROJ")) {
+	if (!Window_init(1200, 1200, "GLFW/OPENGL PROJ")) {
 		printf("window diff\n");
 		return 1;
 	} else {

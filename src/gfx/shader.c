@@ -7,11 +7,14 @@ const char *vertexShaderSource =
 	"layout (location = 2) in vec2 aTexCoord;\n"
 	"out vec4 vertexCol;\n"
 	"out vec2 TexCoord;\n"
-	"uniform mat4 transform;\n"
+	//"uniform mat4 transform;\n"	//changed transform
+	"uniform mat4 model;\n"
+	"uniform mat4 view;\n"
+	"uniform mat4 projection;"
     "void main()\n"
     "{\n"
 	"	vertexCol = vec4(aCol.r, aCol.g, aCol.b, aCol.a);\n"
-    "   gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n" //vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+    "   gl_Position = projection * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n" //vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
 	"   TexCoord = aTexCoord;\n"
     "}\0";
 
@@ -28,7 +31,7 @@ const char *fragmentShaderSource =
     //"   FragColor = vertexCol;\n"						//only color
 	//"	FragColor = texture(ourTexture, TexCoord);\n"	//just texture
 	//"	FragColor = texture(ourTexture, TexCoord) * vec4(vertexCol);\n"	//add rgb
-	"	FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.4);\n"
+	"	FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.3);\n"
     "}\n\0";
 
 void loadShaders(const char* vsSource, const char* fsSource) {

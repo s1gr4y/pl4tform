@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 // global window
 struct Window window;
@@ -16,6 +17,11 @@ unsigned int VAO, EBO;
 unsigned int VBO;
 //unsigned int texture1, texture2;
 unsigned int textures[10];
+
+vec3 cameraPos = {0.0f, 0.0f, 3.0f};
+vec3 cameraTarget = {0.0f, 0.0f, 0.0f};
+vec3 result;
+vec3 cameraDirection;
 
 int Window_init(int wid, int high, char* title) {
 	window.wid = wid;
@@ -83,10 +89,10 @@ int Window_init(int wid, int high, char* title) {
 
 	glm_mat4_mulv(trans, vec, vec);
 	//printf("soem: %f\n",trans[3][3]);
-	printf("%f\n", vec[0]);
-	printf("%f\n", vec[1]);
-	printf("%f\n", vec[2]);
-	printf("%f\n", vec[3]);
+	//printf("%f\n", vec[0]);
+	//printf("%f\n", vec[1]);
+	//printf("%f\n", vec[2]);
+	//printf("%f\n", vec[3]);
 	glm_mat4_identity(trans);
 	//figure way to conv rad to deg
 	glm_rotate(trans, (1.571f), (vec3){0.0f, 0.0f, 1.0f});
@@ -95,29 +101,62 @@ int Window_init(int wid, int high, char* title) {
 	//glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (float*)(trans));
 
 
-
+	/*
 	float vertices[] = {	//x, y, z || r, g, b, a || x, y (texture pos)
 	     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,		//top right
 	     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,		//bottom right
 	    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,		//bottom left
 	    -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f		//top left
 	};
+	*/
+	float vertices[] = { //x,y,z r,g,b,a, x,y
+	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+	         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+	         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+	         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+	        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
 
-	float trigColors[] = {	//r, g, b, a
-		1.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.5f, 0.0f, 0.5f, 1.0f
-	};
+	        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+	         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+	        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+	        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+
+	        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+	        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+	        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+	        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+
+	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+	         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+	         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+	         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+	         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+
+	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+	         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+	         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+	         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+	        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+
+	        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+	         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+	        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+	        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f
+	    };
+
 
 	int posIndices[] = {
-		0, 1, 3,   // first triangle
-		1, 2, 3    // second triangle
-	};
-
-	int colIndices[] = {
 		0, 1, 2,   // first triangle
-		0, 1, 2    // second triangle
+		3, 4, 5,   // second triangle
 	};
 
 	//unsigned int VBO, VAO, EBO;
@@ -214,8 +253,9 @@ int Window_init(int wid, int high, char* title) {
 	glUniform1i(glGetUniformLocation(programID, "texture1"), 0);
 	glUniform1i(glGetUniformLocation(programID, "texture2"), 1);
 
-	unsigned int transformLoc = glGetUniformLocation(programID, "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (float*)(trans));
+	//unsigned int transformLoc = glGetUniformLocation(programID, "transform");
+	//glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (float*)(trans));
+
 
 
 
@@ -224,7 +264,7 @@ int Window_init(int wid, int high, char* title) {
 	//getcwd(path, 200);
 	//printf("Current working directory: %s\n", path);
 
-	//glfwSwapInterval(1);	//1 for vsync, 0 not
+	glfwSwapInterval(1);	//1 for vsync, 0 not
 	window_loop();
 	return 1;
 }	//1 == opened window, 0 == failed
@@ -312,14 +352,39 @@ void window_loop() {
 	/*Load b4 main loop:*/
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);		//wireframe
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//for filled
-
+	glEnable(GL_DEPTH_TEST);
 	glBindVertexArray(VAO);
 
-
+	window.tick = 0;
 	window.curr_time = glfwGetTime();
 	window.prev_time = glfwGetTime();
 	window.dt = 0.0;							//delta time
 	window.time_passed = 0.0;					//how long program has been running
+
+	vec3 cubePositions[] = {
+	    { 0.0f,  0.0f,  0.0f},
+	    { 2.0f,  5.0f, -15.0f},
+	    {-1.5f, -2.2f, -2.5f},
+	    {-3.8f, -2.0f, -12.3f},
+	    { 2.4f, -0.4f, -3.5f},
+	    {-1.7f,  3.0f, -7.5f},
+	    { 1.3f, -2.0f, -2.5f},
+	    { 1.5f,  2.0f, -2.5f},
+	    { 1.5f,  0.2f, -1.5f},
+	    {-1.3f,  1.0f, -1.5f}
+	};
+
+	glm_vec3_sub(cameraPos, cameraTarget, result);
+	glm_vec3_normalize_to(result, cameraDirection);
+	vec3 up = {0.0f, 1.0f, 0.0f};
+	//use up and overwrite to cameraRight
+	vec3 cameraRight;
+	glm_cross(up, cameraDirection, cameraRight);
+	glm_normalize(cameraRight);
+	vec3 cameraUp;
+	glm_cross(cameraDirection, cameraRight, cameraUp);
+	//mat4 view;
+	//glm_look(cameraPos, cameraTarget, up, view);
 
 	while(!glfwWindowShouldClose(window.handle)) {
 		//trigColors[5] = (sin(window.curr_time) / 2.0f) + 0.5f;
@@ -330,7 +395,7 @@ void window_loop() {
 		//printf("previous time: %f\n",window.prev_time);
 		window.dt = window.curr_time - window.prev_time;
 		window.prev_time = window.curr_time;
-		//printf("delta time: %f\n",window.dt);
+		printf("delta time: %f\n",window.dt);
 
 		window.tick_float += window.dt * TICK_RATE;
 		window.tick = (int)window.tick_float;
@@ -347,8 +412,8 @@ void window_loop() {
 	    	break;
 	    }
 
-	    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	    glClear(GL_COLOR_BUFFER_BIT);
+	    glClearColor(0.2f, 0.2f, 0.2f, 0.2f);
+	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	    glUseProgram(programID);
 	    glBindVertexArray(VAO);
@@ -362,7 +427,67 @@ void window_loop() {
 	    //glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
 	    //glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	    //glEnableVertexAttribArray(1);
-	    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	    //rotate
+	    /*
+	    mat4 trans;
+	    glm_mat4_identity(trans);
+	    glm_translate(trans, (vec3){0.5f, -0.5f, 0.0f});
+	    glm_rotate(trans, sin(glfwGetTime()), (vec3){0.0f, 0.0f, 1.0f});
+	    unsigned int transformLoc = glGetUniformLocation(programID, "transform");
+	    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (float*)(trans));
+	    */
+	    // create transformations
+		mat4 model;
+		//glm_mat4_identity(model);
+		mat4 view;
+		glm_mat4_identity(view);
+		mat4 projection;
+		glm_mat4_identity(projection);
+		//glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f), (vec3){0.5f, 1.0f, 0.0f});
+		//glm_translate(model, (vec3){0.0f, -0.5f, 0.0f});
+		//glm_translate(view, (vec3){0.0f, 0.0f, 0.0f});
+		//printf("%f", 2*cos(glm_rad(window.tick-90)));
+		//glm_translate(view, (vec3){0.0f, 0.0f, -3.0f});
+
+		//glm_rotate(view, glm_rad(window.tick), (vec3){0.0f, 1.0f, 0.0f});
+		glm_perspective(glm_rad(90.0f), (float)window.wid / (float)window.high, 0.1f, 100.0f, projection);
+		// retrieve the matrix uniform locations
+		//glm_rotate(projection, glm_rad(window.tick), (vec3){0.0f, 1.0f, 0.0f});
+
+		float radius = 6.0f;
+		float camX = sin(glfwGetTime()) * radius;
+		float camZ = cos(glfwGetTime()) * radius;
+		//mat4 view;
+		glm_lookat((vec3){camX, 0.0f, camZ}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0, 1.0f, 0.0f}, view);
+
+
+		//unsigned int modelLoc = glGetUniformLocation(programID, "model");
+		unsigned int viewLoc  = glGetUniformLocation(programID, "view");
+		unsigned int projLoc  = glGetUniformLocation(programID, "projection");
+		// pass them to the shaders (3 different ways)
+		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)model);
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)view);
+		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
+
+
+	    //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		for(unsigned int i = 0; i < 10; i++) {
+			glm_mat4_identity(model);
+		    glm_translate(model, cubePositions[i]);
+		    float angle = 20.0f * i;
+		    glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
+		    if (i == 0) {
+		    	glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f), (vec3){0.5f, 1.0f, 0.0f});
+		    }
+		    unsigned int modelLoc = glGetUniformLocation(programID, "model");
+		    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)model);
+		    glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+
 
 	    glfwSwapBuffers(window.handle);
 	    glfwPollEvents();
