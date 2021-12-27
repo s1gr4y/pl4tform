@@ -1,5 +1,6 @@
 #include "window.h"
 #include "shader.h"
+#include "../entity/camera.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <cglm/cglm.h>   /* for inline */
@@ -28,6 +29,9 @@ int Window_init(int wid, int high, char* title) {
 	window.high = high;
 	window.title = title;
 	window.tick = 0;
+
+	//init camera
+	Camera_init();
 
 	if (!glfwInit()) {
 		return 0;
@@ -60,33 +64,11 @@ int Window_init(int wid, int high, char* title) {
 	// [0, 0, 0, 1]
 	//mat4[0][3] == 0, mat4[3][0] == 4
 	vec4 vec = {1.0f, 0.0f, 0.0f, 1.0f};
-	printf("%f\n", vec[0]);
-	printf("%f\n", vec[1]);
-	printf("%f\n", vec[2]);
-	printf("%f\n", vec[3]);
 	mat4 trans;
 	glm_mat4_identity(trans);
 	//printf("soem: %f\n",trans[3][3]); //accurate...
 	//vec3 temp = {1.0f, 1.0f, 0.0f};
 	glm_translate(trans, (vec3){1.0f, 1.0f, 0.0f});
-
-	/*
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			printf("val at (i: %i) (j: %i): %f\n", i, j, trans[i][j]);
-		}
-	}
-	*/
-	/* what it should do:
-	trans[0][3] = 1.0f;
-	trans[1][3] = 1.0f;
-	trans[2][3] = 0.0f;
-	printf("soem: %f\n",trans[2][3]);
-	vec[0] += trans[0][3];
-	vec[1] += trans[1][3];
-	vec[2] += trans[2][3];
-	*/ //but it doesn't?
-
 	glm_mat4_mulv(trans, vec, vec);
 	//printf("soem: %f\n",trans[3][3]);
 	//printf("%f\n", vec[0]);
@@ -109,54 +91,115 @@ int Window_init(int wid, int high, char* title) {
 	    -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f		//top left
 	};
 	*/
+	/*
 	float vertices[] = { //x,y,z r,g,b,a, x,y
-	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-	         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-	         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
 
-	        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-	         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-	        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
 
-	        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-	        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-	        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-	        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
 
-	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-	         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-	         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-	         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
 
-	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-	         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-	         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-	        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-	        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
 
-	        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-	         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-	         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-	        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-	        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f
-	    };
+		-0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f
+	};
+	*/
 
+	float vertices[] = { //x,y,z | x,y
+		//front / back faces
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
 
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+
+		//left / right faces
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		 //bottom / top faces
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+	};
+
+	/*
 	int posIndices[] = {
-		0, 1, 2,   // first triangle
-		3, 4, 5,   // second triangle
+		0, 1, 2, 3, 4, 5,   // first triangle
+		6, 7, 8, 9, 10, 11,  	// second triangle
+		12, 13, 14, 15, 16, 17,
+		18, 19, 20, 21, 22, 23,
+		24, 25, 26, 27, 28, 29,
+		30, 31, 32, 33, 34, 35
+	};
+	*/
+	int posIndices[] = {
+		0, 1, 2,	//sq 1:
+		1, 2, 3,
+
+		4, 5, 6,	//sq 1:
+		5, 6, 7,
+
+		8, 9, 10,	//sq 1:
+		9, 10, 11,
+
+		12, 13, 14,	//sq 1:
+		13, 14, 15,
+
+		16, 17, 18,	//sq 1:
+		17, 18, 19,
+
+		20, 21, 22,	//sq 1:
+		21, 22, 23
 	};
 
 	//unsigned int VBO, VAO, EBO;
@@ -185,13 +228,13 @@ int Window_init(int wid, int high, char* title) {
 
 	// 4. then set the vertex attributes pointers
 	///*
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+	//glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(7 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 	//*/
 
@@ -264,7 +307,7 @@ int Window_init(int wid, int high, char* title) {
 	//getcwd(path, 200);
 	//printf("Current working directory: %s\n", path);
 
-	glfwSwapInterval(1);	//1 for vsync, 0 not
+	glfwSwapInterval(0);	//1 for vsync, 0 not
 	window_loop();
 	return 1;
 }	//1 == opened window, 0 == failed
@@ -276,15 +319,20 @@ void framebuffer_size_callback(GLFWwindow* handle, int width, int height) {
     window.high = height;
 }
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+static void key_callback(GLFWwindow* handle, int key, int scancode, int action, int mods) {
     //if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     //    glfwSetWindowShouldClose(window, GLFW_TRUE);
     //}
 	///*
+	vec3 temp;
     if (action == GLFW_PRESS) { //start switch case to see what to do
     	switch (key) {
     		case GLFW_KEY_ESCAPE:
-    			glfwSetWindowShouldClose(window, GLFW_TRUE);
+    			glfwSetWindowShouldClose(window.handle, GLFW_TRUE);
+    			break;
+    		case GLFW_KEY_W:
+    			glm_vec3_scale(camera.cameraFront, (window.dt * CAM_SPEED) * TICK_RATE, temp);
+    			glm_vec3_add(camera.cameraPos, temp, camera.cameraPos);
     			break;
     		default:
     			break;
@@ -352,6 +400,10 @@ void window_loop() {
 	/*Load b4 main loop:*/
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);		//wireframe
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//for filled
+
+	glfwSetKeyCallback(window.handle, key_callback);
+	glfwSetFramebufferSizeCallback(window.handle, framebuffer_size_callback);
+
 	glEnable(GL_DEPTH_TEST);
 	glBindVertexArray(VAO);
 
@@ -401,7 +453,8 @@ void window_loop() {
 		window.tick = (int)window.tick_float;
 		window.time_passed += window.dt;
 
-		glfwSetKeyCallback(window.handle, key_callback);
+		//glfwSetKeyCallback(window.handle, key_callback);
+		//glfwSetFramebufferSizeCallback(window.handle, framebuffer_size_callback);
 
 		//printf("hi\n");
 	    //printf("%llu\n", window.tick);
@@ -448,7 +501,7 @@ void window_loop() {
 		//glm_translate(model, (vec3){0.0f, -0.5f, 0.0f});
 		//glm_translate(view, (vec3){0.0f, 0.0f, 0.0f});
 		//printf("%f", 2*cos(glm_rad(window.tick-90)));
-		//glm_translate(view, (vec3){0.0f, 0.0f, -3.0f});
+		glm_translate(view, (vec3){0.0f, 0.0f, -3.0f});
 
 		//glm_rotate(view, glm_rad(window.tick), (vec3){0.0f, 1.0f, 0.0f});
 		glm_perspective(glm_rad(90.0f), (float)window.wid / (float)window.high, 0.1f, 100.0f, projection);
@@ -456,10 +509,15 @@ void window_loop() {
 		//glm_rotate(projection, glm_rad(window.tick), (vec3){0.0f, 1.0f, 0.0f});
 
 		float radius = 6.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
+		float camX = sin(glm_rad(window.tick)) * radius;
+		float camZ = cos(glm_rad(window.tick)) * radius;
+		//printf("%i\n", window.tick);
 		//mat4 view;
-		glm_lookat((vec3){camX, 0.0f, camZ}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0, 1.0f, 0.0f}, view);
+		vec3 tempVec;
+		glm_vec3_zero(tempVec);
+		glm_vec3_add(camera.cameraPos, camera.cameraFront, tempVec);
+		//tmp vec lets us look straight
+		glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, view);
 
 
 		//unsigned int modelLoc = glGetUniformLocation(programID, "model");
@@ -471,7 +529,7 @@ void window_loop() {
 		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
 
-
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	    //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 		//glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -485,12 +543,13 @@ void window_loop() {
 		    }
 		    unsigned int modelLoc = glGetUniformLocation(programID, "model");
 		    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)model);
-		    glDrawArrays(GL_TRIANGLES, 0, 36);
+		    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);	//for EBO
+		    //glDrawArrays(GL_TRIANGLES, 0, 36);	//to use VAO
 		}
 
 
-	    glfwSwapBuffers(window.handle);
-	    glfwPollEvents();
+		glfwPollEvents();
+		glfwSwapBuffers(window.handle);
 	}
 
 	//glfwDestroyWindow(window.handle);

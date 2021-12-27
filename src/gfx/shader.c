@@ -35,19 +35,45 @@ const char *fragmentShaderSource =
     "}\n\0";
 
 void loadShaders(const char* vsSource, const char* fsSource) {
+	int success;
+	char infoLog[512];
 	vs = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vs, 1, &vsSource, NULL);
 	glCompileShader(vs);
 
+	// check for shader compile errors
+    glGetShaderiv(vs, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vs, 512, NULL, infoLog);
+        printf("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n");
+        printf("%s\n", infoLog);
+    }
+
 	fs = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fs, 1, &fsSource, NULL);
 	glCompileShader(fs);
+
+    // check for shader compile errors
+    glGetShaderiv(fs, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fs, 512, NULL, infoLog);
+        printf("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n");
+		printf("%s\n",infoLog);
+    }
 
 	programID = glCreateProgram();
 	glAttachShader(programID, vs);
 	glAttachShader(programID, fs);
 
 	glLinkProgram(programID);
+
+	//check linking errors
+    glGetProgramiv(programID, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(programID, 512, NULL, infoLog);
+        printf("ERROR::SHADER::PROGRAM::LINKING_FAILED\n");
+        printf("%s\n", infoLog);
+    }
 
 	//delete everything
 	glDetachShader(programID, vs);
