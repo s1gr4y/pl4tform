@@ -18,6 +18,7 @@ unsigned int VAO, EBO;
 unsigned int VBO;
 //unsigned int texture1, texture2;
 unsigned int textures[10];
+int firstMouse = 1;
 
 vec3 cameraPos = {0.0f, 0.0f, 3.0f};
 vec3 cameraTarget = {0.0f, 0.0f, 0.0f};
@@ -29,6 +30,12 @@ int Window_init(int wid, int high, char* title) {
 	window.high = high;
 	window.title = title;
 	window.tick = 0;
+	window.lastX = wid/2;
+	window.lastY = high/2;
+	//firstMouse = 1;
+	for (int i = 0; i < GLFW_KEY_LAST; i++) {
+		window.keyboard.keys[i] = 0;
+	}
 
 	//init camera
 	Camera_init();
@@ -307,7 +314,8 @@ int Window_init(int wid, int high, char* title) {
 	//getcwd(path, 200);
 	//printf("Current working directory: %s\n", path);
 
-	glfwSwapInterval(0);	//1 for vsync, 0 not
+	glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSwapInterval(1);	//1 for vsync, 0 not
 	window_loop();
 	return 1;
 }	//1 == opened window, 0 == failed
@@ -325,21 +333,89 @@ static void key_callback(GLFWwindow* handle, int key, int scancode, int action, 
     //}
 	///*
 	vec3 temp;
-    if (action == GLFW_PRESS) { //start switch case to see what to do
-    	switch (key) {
-    		case GLFW_KEY_ESCAPE:
-    			glfwSetWindowShouldClose(window.handle, GLFW_TRUE);
-    			break;
-    		case GLFW_KEY_W:
-    			glm_vec3_scale(camera.cameraFront, (window.dt * CAM_SPEED) * TICK_RATE, temp);
-    			glm_vec3_add(camera.cameraPos, temp, camera.cameraPos);
-    			break;
-    		default:
-    			break;
-    	}
-    }
-    //*/
+	//instead use array of keys and set true when pressed and false until it is released
+	if (action < 0) {
+		return;
+	} else {
+		switch (action) {
+		        case GLFW_PRESS:
+		            window.keyboard.keys[key] = 1;
+		            break;
+		        case GLFW_RELEASE:
+		            window.keyboard.keys[key] = 0;
+		            break;
+		        default:
+		            break;
+		}
+	}
+	/*
+	if (glfwGetKey(window.handle, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window.handle, GLFW_TRUE);
+	} else if (glfwGetKey(window.handle, GLFW_KEY_W) == GLFW_PRESS) { //start switch case to see what to do
+    	glm_vec3_scale(camera.cameraFront, (window.dt * CAM_SPEED) * TICK_RATE, temp);
+    	glm_vec3_add(camera.cameraPos, temp, camera.cameraPos);
+    } else if (glfwGetKey(window.handle, GLFW_KEY_W) == GLFW_RELEASE){
+	    printf("STOPPED PRESSED!\n");
+	}
+    */
 }
+
+void action_callback() {
+	// if key is pressed down do stuff.
+	vec3 temp;
+	if (window.keyboard.keys[GLFW_KEY_ESCAPE]) {
+		glfwSetWindowShouldClose(window.handle, GLFW_TRUE);
+	}
+	if (window.keyboard.keys[GLFW_KEY_W]) {
+		glm_vec3_scale(camera.cameraFront, (window.dt * CAM_SPEED) * TICK_RATE, temp);
+		glm_vec3_add(camera.cameraPos, temp, camera.cameraPos);
+	}
+	if (window.keyboard.keys[GLFW_KEY_S]) {
+		glm_vec3_scale(camera.cameraFront, (window.dt * CAM_SPEED) * TICK_RATE, temp);
+		glm_vec3_sub(camera.cameraPos, temp, camera.cameraPos);
+	}
+	if (window.keyboard.keys[GLFW_KEY_A]) {
+		glm_cross(camera.cameraFront, camera.cameraUp, temp);
+		glm_normalize(temp);
+		glm_vec3_scale(temp, (window.dt * CAM_SPEED) * TICK_RATE, temp);
+		glm_vec3_sub(camera.cameraPos, temp, camera.cameraPos);
+	}
+	if (window.keyboard.keys[GLFW_KEY_D]) {
+		glm_cross(camera.cameraFront, camera.cameraUp, temp);
+		glm_normalize(temp);
+		glm_vec3_scale(temp, (window.dt * CAM_SPEED) * TICK_RATE, temp);
+		glm_vec3_add(camera.cameraPos, temp, camera.cameraPos);
+	}
+}
+
+void mouse_callback(GLFWwindow* handle, double xpos, double ypos) {
+	if (firstMouse) {
+		window.lastX = xpos;
+		window.lastY = ypos;
+	    firstMouse = 0;
+	}
+
+	float xoffset = xpos - window.lastX;
+	float yoffset = window.lastY - ypos; // reversed since y-coordinates range from bottom to top
+	window.lastX = xpos;
+	window.lastY = ypos;
+
+	const float sensitivity = 0.1f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+
+	camera.theta = fmod((camera.theta + xoffset), 360);
+	camera.phi += yoffset;
+
+	if(camera.phi > 89.0f)
+		camera.phi =  89.0f;
+	if(camera.phi < -89.0f)
+		camera.phi = -89.0f;
+
+	calc_orientation();
+}
+
 ///*
 void generateTexture(unsigned int* txtIndex, const char* file_name) {
 
@@ -403,6 +479,7 @@ void window_loop() {
 
 	glfwSetKeyCallback(window.handle, key_callback);
 	glfwSetFramebufferSizeCallback(window.handle, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window.handle, mouse_callback);
 
 	glEnable(GL_DEPTH_TEST);
 	glBindVertexArray(VAO);
@@ -447,7 +524,7 @@ void window_loop() {
 		//printf("previous time: %f\n",window.prev_time);
 		window.dt = window.curr_time - window.prev_time;
 		window.prev_time = window.curr_time;
-		printf("delta time: %f\n",window.dt);
+		//printf("delta time: %f\n",window.dt);
 
 		window.tick_float += window.dt * TICK_RATE;
 		window.tick = (int)window.tick_float;
@@ -501,23 +578,29 @@ void window_loop() {
 		//glm_translate(model, (vec3){0.0f, -0.5f, 0.0f});
 		//glm_translate(view, (vec3){0.0f, 0.0f, 0.0f});
 		//printf("%f", 2*cos(glm_rad(window.tick-90)));
-		glm_translate(view, (vec3){0.0f, 0.0f, -3.0f});
+		//glm_translate(view, (vec3){0.0f, 0.0f, -3.0f});
 
 		//glm_rotate(view, glm_rad(window.tick), (vec3){0.0f, 1.0f, 0.0f});
 		glm_perspective(glm_rad(90.0f), (float)window.wid / (float)window.high, 0.1f, 100.0f, projection);
 		// retrieve the matrix uniform locations
 		//glm_rotate(projection, glm_rad(window.tick), (vec3){0.0f, 1.0f, 0.0f});
 
-		float radius = 6.0f;
-		float camX = sin(glm_rad(window.tick)) * radius;
-		float camZ = cos(glm_rad(window.tick)) * radius;
+		//float radius = 6.0f;
+		//float camX = sin(glm_rad(window.tick)) * radius;
+		//float camZ = cos(glm_rad(window.tick)) * radius;
 		//printf("%i\n", window.tick);
 		//mat4 view;
+		//calc_orientation();
+
 		vec3 tempVec;
 		glm_vec3_zero(tempVec);
+		glm_vec3_copy(camera.direction, camera.cameraFront);
 		glm_vec3_add(camera.cameraPos, camera.cameraFront, tempVec);
 		//tmp vec lets us look straight
-		glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, view);
+		//glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		//update everything b4 changing cam
+		//glm_vec3_add(camera.cameraPos, camera.cameraFront, camera.cameraFront);
+		glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
 
 
 		//unsigned int modelLoc = glGetUniformLocation(programID, "model");
@@ -525,7 +608,7 @@ void window_loop() {
 		unsigned int projLoc  = glGetUniformLocation(programID, "projection");
 		// pass them to the shaders (3 different ways)
 		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)model);
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)view);
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)camera.lookAt_mat);
 		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
 
@@ -547,8 +630,8 @@ void window_loop() {
 		    //glDrawArrays(GL_TRIANGLES, 0, 36);	//to use VAO
 		}
 
-
 		glfwPollEvents();
+		action_callback();
 		glfwSwapBuffers(window.handle);
 	}
 

@@ -5,6 +5,15 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+struct Button {
+	int pressed;
+};
+
+struct Keyboard {
+	//arr of all possible key presses since GLFW_KEY_LAST is largest num
+	int keys[GLFW_KEY_LAST];
+};
+
 struct Window {
     GLFWwindow *handle;
     int wid, high;
@@ -12,21 +21,30 @@ struct Window {
     unsigned long long int tick;
     double tick_float;
 
+    //last x and y coords of mouse
+    float lastX;
+    float lastY;
+
     double curr_time;
     double prev_time;
     double dt;									//delta time
     double time_passed;					//how long program has been running
+    struct Keyboard keyboard;
 };
 
 //GLFWwindow* window;
 
 int Window_init(int wid, int high, char* title);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void action_callback();
+void mouse_callback(GLFWwindow* handle, double xpos, double ypos);
 void generateTexture(unsigned int* txtIndex, const char* file_name);
 void window_loop();
 
 // global window
 extern struct Window window;
+extern int firstMouse;
+//extern struct Keyboard keyboard;
 extern const int TICK_RATE;
 
 #endif	//end WIN_ENGINE
