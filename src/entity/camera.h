@@ -11,9 +11,11 @@ struct Camera {
 	mat4 lookAt_mat;
 
 	//orientation
-	vec3 direction;
+	//quaterninion vec, direction[0] = w || 1-3 are: x, y, z
+	vec4 direction;
 	float theta;
 	float phi;
+	float roll; //placeholder, typically 0
 };
 
 void Camera_init();

@@ -406,12 +406,13 @@ void mouse_callback(GLFWwindow* handle, double xpos, double ypos) {
 
 
 	camera.theta = fmod((camera.theta + xoffset), 360);
-	camera.phi += yoffset;
-
-	if(camera.phi > 89.0f)
-		camera.phi =  89.0f;
-	if(camera.phi < -89.0f)
-		camera.phi = -89.0f;
+	camera.phi = fmod((camera.phi + yoffset), 180);;
+	///*
+	if(camera.phi > 89.9f)
+		camera.phi =  89.9f;
+	if(camera.phi < -90.0f)
+		camera.phi = -90.0f;
+	//*/
 
 	calc_orientation();
 }
@@ -600,7 +601,17 @@ void window_loop() {
 		//glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
 		//update everything b4 changing cam
 		//glm_vec3_add(camera.cameraPos, camera.cameraFront, camera.cameraFront);
-		glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		//printf("cam theta: %f\n", sin(glm_rad(camera.theta)));
+		//printf("cam phi: %f\n", cos(glm_rad(camera.theta)));
+		//printf("phi: %f\n", camera.phi);
+		if (camera.phi <= -90.0f) {
+			glm_vec3_copy((vec3){cos(glm_rad(camera.theta)), 0.0f, sin(glm_rad(camera.theta))}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		} else {
+			//set upvector to be the based on player theta with x and z ignore y
+			glm_vec3_copy((vec3){0.0f, 1.0f, 0.0f}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		}
 
 
 		//unsigned int modelLoc = glGetUniformLocation(programID, "model");
