@@ -6,11 +6,6 @@
 #include <cglm/cglm.h>   /* for inline */
 //#include <cglm/call.h>   /* for library call (this also includes cglm.h) */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
 // global window
 struct Window window;
 const int TICK_RATE = 66;
@@ -406,13 +401,17 @@ void mouse_callback(GLFWwindow* handle, double xpos, double ypos) {
 
 
 	camera.theta = fmod((camera.theta + xoffset), 360);
-	camera.phi = fmod((camera.phi + yoffset), 180);;
-	///*
+	//two semicolons means that line of code doesn't run. weird
+	//camera.phi = (camera.phi + yoffset);
+	camera.phi = fmod((camera.phi + yoffset), 360);
+	//camera.phi = 90.0f;
+	//camera.phi = fmod((camera.phi + yoffset), 180);;
+	/*
 	if(camera.phi > 89.9f)
 		camera.phi =  89.9f;
 	if(camera.phi < -90.0f)
 		camera.phi = -90.0f;
-	//*/
+	*/
 
 	calc_orientation();
 }
@@ -602,9 +601,24 @@ void window_loop() {
 		//update everything b4 changing cam
 		//glm_vec3_add(camera.cameraPos, camera.cameraFront, camera.cameraFront);
 		//printf("cam theta: %f\n", sin(glm_rad(camera.theta)));
-		//printf("cam phi: %f\n", cos(glm_rad(camera.theta)));
-		//printf("phi: %f\n", camera.phi);
-		if (camera.phi <= -90.0f) {
+		printf("theta: %f\n", camera.theta);
+		printf("phi: %f\n", camera.phi);
+		float temp_phi = 0.0f;
+		float temp_theta = 0.0f;
+		if (camera.phi < 0.0f) {
+			temp_phi = (camera.phi + 360.0f);
+		}
+		if (camera.theta < 0.0f) {
+			temp_theta = (camera.theta + 360.0f);
+		}
+
+
+
+		/*
+		if (temp_phi >= 270.0f) { //camera.phi <= -90.0f
+			glm_vec3_copy((vec3){cos(glm_rad(camera.theta)), 0.0f, sin(glm_rad(camera.theta))}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		} else if (temp_phi >= 90.0f) {
 			glm_vec3_copy((vec3){cos(glm_rad(camera.theta)), 0.0f, sin(glm_rad(camera.theta))}, camera.cameraUp);
 			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
 		} else {
@@ -612,6 +626,43 @@ void window_loop() {
 			glm_vec3_copy((vec3){0.0f, 1.0f, 0.0f}, camera.cameraUp);
 			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
 		}
+		*/
+		//all cases and has correct up vector.
+		if (camera.phi <= -270.0f) {
+			glm_vec3_copy((vec3){-cos(glm_rad(camera.theta)), 0.0f, -sin(glm_rad(camera.theta))}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		} else if (camera.phi <= -180.0f) {
+			glm_vec3_copy((vec3){0.0f, -1.0f, 0.0f}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		} else if (camera.phi <= -90.0f) { //camera.phi <= -90.0f
+			glm_vec3_copy((vec3){cos(glm_rad(camera.theta)), 0.0f, sin(glm_rad(camera.theta))}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		} else if (camera.phi >= 270.0f) {
+			glm_vec3_copy((vec3){cos(glm_rad(camera.theta)), 0.0f, sin(glm_rad(camera.theta))}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		}else if (camera.phi >= 180.0f) {
+			glm_vec3_copy((vec3){0.0f, -1.0f, 0.0f}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		} else if (camera.phi >= 90.0f) {
+			glm_vec3_copy((vec3){-cos(glm_rad(camera.theta)), 0.0f, -sin(glm_rad(camera.theta))}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		} else { //between 90 and -90
+			//set upvector to be the based on player theta with x and z ignore y
+			glm_vec3_copy((vec3){0.0f, 1.0f, 0.0f}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		}
+
+
+		/*
+		if (camera.phi <= -90.0f) { //camera.phi <= -90.0f
+			glm_vec3_copy((vec3){cos(glm_rad(camera.theta)), 0.0f, sin(glm_rad(camera.theta))}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		} else {
+			//set upvector to be the based on player theta with x and z ignore y
+			glm_vec3_copy((vec3){0.0f, 1.0f, 0.0f}, camera.cameraUp);
+			glm_lookat(camera.cameraPos, tempVec, camera.cameraUp, camera.lookAt_mat);
+		}
+		*/
 
 
 		//unsigned int modelLoc = glGetUniformLocation(programID, "model");
