@@ -311,6 +311,9 @@ int Window_init(int wid, int high, char* title) {
 
 	glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSwapInterval(1);	//1 for vsync, 0 not
+	int temp_high, temp_wid = 0;
+	get_resolution(&temp_wid, &temp_high);
+	glfwSetWindowPos(window.handle, temp_wid/4, temp_high/12); //set the window position to mid
 	window_loop();
 	return 1;
 }	//1 == opened window, 0 == failed
@@ -320,6 +323,13 @@ void framebuffer_size_callback(GLFWwindow* handle, int width, int height) {
     glViewport(0, 0, width, height);
     window.wid = width;
     window.high = height;
+}
+
+void get_resolution(int *width, int *high) {
+    const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    //this is current monitor resolution.
+    *width = mode->width;
+    *high = mode->height;
 }
 
 static void key_callback(GLFWwindow* handle, int key, int scancode, int action, int mods) {

@@ -41,6 +41,7 @@ struct Window {
 
 int Window_init(int wid, int high, char* title);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void get_resolution(int *width, int *high);
 void action_callback();
 void mouse_callback(GLFWwindow* handle, double xpos, double ypos);
 void generateTexture(unsigned int* txtIndex, const char* file_name);
