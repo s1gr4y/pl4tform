@@ -9,6 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdbool.h>
+
+#include "../utils/mesh.h"
+#include "../engine/game.h"
 
 struct Button {
 	int pressed;
@@ -44,13 +48,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void get_resolution(int *width, int *high);
 void action_callback();
 void mouse_callback(GLFWwindow* handle, double xpos, double ypos);
-void generateTexture(unsigned int* txtIndex, const char* file_name);
 void window_loop();
 
 // global window
 extern struct Window window;
 extern int firstMouse;
 //extern struct Keyboard keyboard;
-extern const int TICK_RATE;
 
 #endif	//end WIN_ENGINE

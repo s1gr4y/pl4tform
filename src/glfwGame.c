@@ -4,11 +4,11 @@
 #include "gfx/window.h"
 
 int main(void) {
-	if (!Window_init(1200, 1200, "GLFW/OPENGL PROJ")) {
+	if (!Window_init(1920, 1080, "GLFW/OPENGL PROJ")) {
 		printf("window diff\n");
 		return 1;
 	} else {
-		printf("Hello World!\n");
+		printf("Good Bye!\n");
 	}
 
 	return 0;
