@@ -26,12 +26,13 @@ const char *fragmentShaderSource =
 	//"uniform sampler2D ourTexture;\n"
 	"uniform sampler2D texture1;\n"
 	"uniform sampler2D texture2;\n"
+	"uniform float mixer;\n"
     "void main()\n"
     "{\n"
     //"   FragColor = vertexCol;\n"						//only color
 	//"	FragColor = texture(ourTexture, TexCoord);\n"	//just texture
 	//"	FragColor = texture(ourTexture, TexCoord) * vec4(vertexCol);\n"	//add rgb
-	"	FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.3);\n"
+	"	FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), mixer);\n"
     "}\n\0";
 
 void loadShaders(const char* vsSource, const char* fsSource) {
