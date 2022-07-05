@@ -1,20 +1,39 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #include "camera.h"
+#include "../engine/OBB.h"
 
 typedef struct Player {
 	Camera camera;
 	vec3 coords;	//derived from camera somewhat
 	bool in_air;
+	bool jumping;
 	float mass;
-	vec3 acceleration;
+	float width;
+	float height;
+
 	vec3 velocity;
+	vec3 velAdded;
+
 	vec3 velFoward;
 	vec3 velLeft;
 	vec3 velRight;
 	vec3 velBack;
 	vec3 velUp;
+
+	vec4 velFowardNormal;
+	vec4 velLeftNormal;
+	vec4 velRightNormal;
+	vec4 velBackNormal;
+	vec4 velUpNormal;
+
+	vec3 velFront;
+	vec3 velSide;
+	vec3 velFrontNormal;
+	vec3 velSideNormal;
+
 	vec3 prev_velocity;
+	struct OBB box;
 } Player;
 
 Player initPlayer(vec3 coords);

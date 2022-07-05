@@ -62,7 +62,7 @@ int Window_init(int wid, int high, char* title) {
 	//mat4[0][3] == 0, mat4[3][0] == 4
 
 	glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSwapInterval(0);	//1 for vsync, 0 not
+	glfwSwapInterval(1);	//1 for vsync, 0 not
 	int temp_high, temp_wid = 0;
 	get_resolution(&temp_wid, &temp_high);
 	glfwSetWindowPos(window.handle, (temp_wid-window.wid)/2, (temp_high-window.high)/2); //set the window position to mid
@@ -123,6 +123,9 @@ void action_callback() {
 		//glm_vec3_add(player.velocity, temp, player.velocity);
 		if (player.in_air == false) {
 			glm_vec3_add(player.velFoward, temp, player.velFoward);
+		} else {
+			glm_vec3_scale(temp, 0.2f, temp);
+			glm_vec3_add(player.velFoward, temp, player.velFoward);
 		}
 	}
 	if (window.keyboard.keys[GLFW_KEY_S]) {
@@ -133,6 +136,9 @@ void action_callback() {
 		temp[2] = sin(glm_rad(player.camera.theta)) * (window.dt * CAM_SPEED) * TICK_RATE;
 		//glm_vec3_sub(player.velocity, temp, player.velocity);
 		if (player.in_air == false) {
+			glm_vec3_sub(player.velBack, temp, player.velBack);
+		} else {
+			glm_vec3_scale(temp, 0.2f, temp);
 			glm_vec3_sub(player.velBack, temp, player.velBack);
 		}
 	}
@@ -146,6 +152,9 @@ void action_callback() {
 		//glm_vec3_sub(player.velocity, temp, player.velocity);
 		if (player.in_air == false) {
 			glm_vec3_sub(player.velLeft, temp, player.velLeft);
+		} else {
+			glm_vec3_scale(temp, 0.2f, temp);
+			glm_vec3_sub(player.velLeft, temp, player.velLeft);
 		}
 	}
 	if (window.keyboard.keys[GLFW_KEY_D]) {
@@ -158,16 +167,20 @@ void action_callback() {
 		//glm_vec3_add(player.velocity, temp, player.velocity);
 		if (player.in_air == false) {
 			glm_vec3_add(player.velRight, temp, player.velRight);
+		} else {
+			glm_vec3_scale(temp, 0.2f, temp);
+			glm_vec3_add(player.velRight, temp, player.velRight);
 		}
 	}
-	if (window.keyboard.keys[GLFW_KEY_SPACE] && player.in_air == false) {	// && player.in_air == true?	//so we don't inf jump but lol y not.
+	if (window.keyboard.keys[GLFW_KEY_SPACE] && player.in_air == false && player.jumping == false) {	// && player.in_air == true?	//so we don't inf jump but lol y not.
 		vec3 temp;
 		glm_vec3_zero(temp);
-		temp[1] = CAM_SPEED * 3.5;
+		temp[1] = CAM_SPEED * 5;	//3.5
 		//glm_vec3_add(player.velocity, temp, player.velocity);
-		glm_vec3_add(player.velUp, temp, player.velUp);
-		player.in_air = true;
-		//printf("AAAAAAAAAAAAAAAAA: %f, %f, %f\n", player.velocity[0], player.velocity[1], player.velocity[2]);
+		glm_vec3_copy(temp, player.velUp);
+		//player.in_air = true;
+		player.jumping = true;
+		//printf("AAAAAAAAAAAAAAAAA: %f, %f, %f\n", player.velUp[0], player.velUp[1], player.velUp[2]);
 	}
 	//camera.cameraPos[1] = -1.0f;	//lock on y axis	//done with calcPlayerPos
 }
@@ -208,7 +221,7 @@ void mouse_callback(GLFWwindow* handle, double xpos, double ypos) {
 void window_loop() {
 	/*Load b4 main loop:*/
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);		//wireframe
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//for filled
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);		//for filled
 
 	glfwSetKeyCallback(window.handle, key_callback);
 	glfwSetFramebufferSizeCallback(window.handle, framebuffer_size_callback);
@@ -248,13 +261,56 @@ void window_loop() {
 	    	break;
 	    }
 
-	    glClearColor(0.2f, 0.2f, 0.2f, 0.2f);
+	    glClearColor(0.26f, 0.46f, 0.86f, 1.0f);
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	    //glUseProgram(programID);
+	    ComputePositionPlayer(&player, window.dt * TICK_RATE);
+	    calc_orientation(&player.camera);
+	    //player.coords[0] += window.dt * TICK_RATE * player.velocity[0];
+	    //player.coords[1] += window.dt * TICK_RATE * player.velocity[1];
+	    //player.coords[2] += window.dt * TICK_RATE * player.velocity[2];
 
-		calc_orientation(&player.camera);
-		ComputePositionPlayer(&player, window.dt * TICK_RATE);
+	    printf("b4 player->velLeft: %f %f %f\n", player.velLeft[0], player.velLeft[1], player.velLeft[2]);
+		//tmp remove l8r
+		//glm_vec3_copy(player.coords, world.objList[9].coordinates);
+		//player.camera.cameraPos[1] += 1.5f;
+		bool isColliding = false;
+		for (int i = 0; i < world.objCount; i++) {
+			if (i != 0) {
+				//world.objList[i].rotation = fmod(world.objList[i].rotation + window.dt * TICK_RATE, 360.0f);
+				//world.objList[i].coordinates[0] = 15 * sin(glm_rad(window.tick_float));	//need a sudo +=
+				updateOBB(&world.objList[i].box, world.objList[i].coordinates, world.objList[i].scale_dim[0]/2.0f, world.objList[i].scale_dim[1]/2.0f, world.objList[i].scale_dim[2]/2.0f, world.objList[i].orientation_axis, world.objList[i].rotation);
+			}
+			if (ComputeResolveCollisions(&player, &world.objList[i], window.dt * TICK_RATE)) {
+				isColliding = true;
+			}
+		}
+		if (!isColliding) {
+			player.in_air = true;
+			printf("not colliding......................\n");
+		}
+
+		if (player.in_air) {
+			printf("true ???????????????????\n");
+			glm_vec3_copy(player.velFowardNormal, player.velFoward);
+			glm_vec3_copy(player.velBackNormal, player.velBack);
+			glm_vec3_copy(player.velLeftNormal, player.velLeft);
+			glm_vec3_copy(player.velRightNormal, player.velRight);
+			//glm_vec3_copy(player.velUpNormal, player.velUp);
+			//player.velFowardNormal[3] = 0;
+			//player.velBackNormal[3] = 0;
+			//player.velUpNormal[3] = 0;
+		} else {
+			//glm_vec3_copy(player.velUpNormal, player.velUp);
+			//player.velUpNormal[3] = 0;
+		}
+
+		//calc_orientation(&player.camera);
+		//ComputePositionPlayer(&player, window.dt * TICK_RATE);
+		//calc_orientation(&player.camera);
+		//printf("player->up %f\n", player.velUp[1]);
+		printf("now player->velLeft: %f %f %f\n", player.velLeft[0], player.velLeft[1], player.velLeft[2]);
 
 		unsigned int viewLoc  = glGetUniformLocation(programID, "view");
 		unsigned int projLoc  = glGetUniformLocation(programID, "projection");

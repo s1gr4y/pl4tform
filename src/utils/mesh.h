@@ -9,6 +9,7 @@
 //#define TINYOBJ_LOADER_C_IMPLEMENTATION
 #include <tinyobjloader/tinyobj_loader_c.h>
 #include "../gfx/shader.h"
+#include "../engine/OBB.h"
 
 
 #include <stdio.h>
@@ -46,11 +47,14 @@ struct Texture {
 };
 
 typedef struct Object {	//needs orientation (vec3 rotation and axis)
+	unsigned int ID;
 	meshType type;
 	bool one_txture;
+	vec3 velocity;
 	vec3 coordinates;
 	vec3 scale_dim;
 	vec3 orientation_axis;
+	struct OBB box;
 	float rotation;	//in deg
 } Object;
 
