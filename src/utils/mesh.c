@@ -223,8 +223,8 @@ void drawObject(struct Object obj, unsigned int pID) {
 	glBindVertexArray(mesh.VAO);
 	glm_mat4_identity(model);
 	glm_translate(model, obj.coordinates);
-	glm_scale(model, obj.scale_dim);
 	glm_rotate(model, glm_rad(obj.rotation), obj.orientation_axis);
+	glm_scale(model, obj.scale_dim);
 	if (obj.one_txture == true) {
 		glUniform1i(glGetUniformLocation(pID, "texture1"), 1);
 		glUniform1i(glGetUniformLocation(pID, "texture2"), 1);

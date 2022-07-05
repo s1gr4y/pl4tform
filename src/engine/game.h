@@ -13,7 +13,7 @@ typedef struct World_State {
 } World_State;
 
 void initWorld();
-void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, float angle);
+void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, float angle, unsigned int index);
 
 extern World_State world;
 extern Player player;

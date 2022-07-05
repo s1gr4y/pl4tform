@@ -3,6 +3,7 @@
 
 #include "../entity/player.h"
 #include "../utils/mesh.h"
+#include "OBB.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,5 +20,6 @@ void ComputePositionObj(Object obj);
 void ComputePositionPlayer(Player *player, double dt);
 void ApplyGroundResistance(vec3 vector, double dt);
 void ApplyAirResistance(vec3 vector, double dt);
+bool ComputeResolveCollisions(Player *player, Object *obj, float dt);
 
 #endif
