@@ -26,7 +26,7 @@ void initWorld() {
 	glm_vec3_zero(player.velRightNormal);
 	glm_vec3_zero(player.velBackNormal);
 	glm_vec3_zero(player.velUpNormal);
-
+	glm_vec3_zero(player.velMoveAir);
 
 	player.width = 0.25f;
 	player.height = 0.5f;
@@ -52,11 +52,11 @@ void initWorld() {
 			//addObj(meshType_triangle, true, objPositions[i], (vec3){1.5f, 1.0f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, rand() % 91, i);
 		//} else {
 		if (i == 9) {
-			addObj(meshType_cube, true, objPositions[i], (vec3){1.0f, 1.0f, 1.0f}, (vec3){0.0f, 1.0f, 0.0f}, 90.0f, i);
+			addObj(meshType_cube, true, objPositions[i], (vec3){1.0f, 1.0f, 1.0f}, (vec3){0.0f, 1.0f, 0.0f}, 45.0f, i);
 		} else {
-			vec3 tmp = {0.0f, 0.7f, 0.0f};
+			vec3 tmp = {0.0f, 0.1f, 0.0f};
 			glm_vec3_add(tmp, objPositions[i], objPositions[i]);
-			addObj(meshType_cube, true, objPositions[i], (vec3){4.0f, 1.0f, 4.0f}, (vec3){1.0f, 0.0f, 1.0f}, 50.0f, i);
+			addObj(meshType_cube, true, objPositions[i], (vec3){2.0f, 1.0f, 2.0f}, (vec3){(rand() % 11)/10.0f, 0.0f, (rand() % 11)/10.0f}, (rand() % 50)/1.0f, i);
 		}
 		//}
 	}

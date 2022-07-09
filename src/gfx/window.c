@@ -1,5 +1,5 @@
 #include "window.h"
-#include "shader.h"
+//#include "shader.h"
 #include "../entity/camera.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -26,9 +26,6 @@ int Window_init(int wid, int high, char* title) {
 	for (int i = 0; i < GLFW_KEY_LAST; i++) {
 		window.keyboard.keys[i] = 0;
 	}
-
-	//init camera	-done by game now "initWorld"
-	//Camera_init();
 
 	if (!glfwInit()) {
 		return 0;
@@ -182,7 +179,6 @@ void action_callback() {
 		player.jumping = true;
 		//printf("AAAAAAAAAAAAAAAAA: %f, %f, %f\n", player.velUp[0], player.velUp[1], player.velUp[2]);
 	}
-	//camera.cameraPos[1] = -1.0f;	//lock on y axis	//done with calcPlayerPos
 }
 
 void mouse_callback(GLFWwindow* handle, double xpos, double ypos) {
@@ -261,12 +257,12 @@ void window_loop() {
 	    	break;
 	    }
 
-	    glClearColor(0.26f, 0.46f, 0.86f, 1.0f);
+	    glClearColor(0.36f, 0.66f, 0.86f, 1.0f);
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	    //glUseProgram(programID);
 	    ComputePositionPlayer(&player, window.dt * TICK_RATE);
-	    calc_orientation(&player.camera);
+
 	    //player.coords[0] += window.dt * TICK_RATE * player.velocity[0];
 	    //player.coords[1] += window.dt * TICK_RATE * player.velocity[1];
 	    //player.coords[2] += window.dt * TICK_RATE * player.velocity[2];
@@ -292,7 +288,7 @@ void window_loop() {
 		}
 
 		if (player.in_air) {
-			printf("true ???????????????????\n");
+			printf("in air ___________________________\n");
 			glm_vec3_copy(player.velFowardNormal, player.velFoward);
 			glm_vec3_copy(player.velBackNormal, player.velBack);
 			glm_vec3_copy(player.velLeftNormal, player.velLeft);
@@ -308,9 +304,8 @@ void window_loop() {
 
 		//calc_orientation(&player.camera);
 		//ComputePositionPlayer(&player, window.dt * TICK_RATE);
-		//calc_orientation(&player.camera);
-		//printf("player->up %f\n", player.velUp[1]);
-		printf("now player->velLeft: %f %f %f\n", player.velLeft[0], player.velLeft[1], player.velLeft[2]);
+		calc_orientation(&player.camera);
+
 
 		unsigned int viewLoc  = glGetUniformLocation(programID, "view");
 		unsigned int projLoc  = glGetUniformLocation(programID, "projection");

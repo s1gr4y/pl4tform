@@ -375,10 +375,10 @@ bool CheckAxis(vec3 pnts1[], vec3 pnts2[], vec3 axis, vec3 axisRes, float* depth
     if(axis == GLM_VEC3_ZERO)
         return true;
 
-    float aMin = FLT_MAX;
-    float aMax = -FLT_MAX;
-    float bMin = FLT_MAX;
-    float bMax = -FLT_MAX;
+    float b1Min = FLT_MAX;
+    float b1Max = -FLT_MAX;
+    float b2Min = FLT_MAX;
+    float b2Max = -FLT_MAX;
 
     // Define two intervals, a and b. Calculate their min and max values
     //maybe getting garbage values for this look l8r
@@ -388,26 +388,26 @@ bool CheckAxis(vec3 pnts1[], vec3 pnts2[], vec3 axis, vec3 axisRes, float* depth
     	//printf("reading p1: %f, %f, %f\n", pnts1[i][0], pnts1[i][1], pnts1[i][2]);
         float aDist = glm_vec3_dot(pnts1[i], axis);
         //printf("aDist %f\n", aDist);
-        aMin = ( aDist < aMin ) ? aDist : aMin;
-        aMax = ( aDist > aMax ) ? aDist : aMax;
+        b1Min = ( aDist < b1Min ) ? aDist : b1Min;
+        b1Max = ( aDist > b1Max ) ? aDist : b1Max;
         //printf("reading p2: %f, %f, %f\n", pnts2[i][0], pnts2[i][1], pnts2[i][2]);
         float bDist = glm_vec3_dot(pnts2[i], axis);
         //printf("bDist %f\n", bDist);
-        bMin = ( bDist < bMin ) ? bDist : bMin;
-        bMax = ( bDist > bMax ) ? bDist : bMax;
+        b2Min = ( bDist < b2Min ) ? bDist : b2Min;
+        b2Max = ( bDist > b2Max ) ? bDist : b2Max;
     }
 
     // One-dimensional intersection test between a and b
     //printf("amax: %f, amin: %f, bmax: %f, bmin: %f\n", aMax, aMin, bMax, bMin);
-    float longSpan = glm_max(aMax, bMax) - glm_min(aMin, bMin);	//glm_max?
-    float sumSpan = aMax - aMin + bMax - bMin;
-    if (longSpan <= sumSpan) { 			// Change this to <= if you want the case were they are touching but not overlapping, to count as an intersection
+    float longSpan = glm_max(b1Max, b2Max) - glm_min(b1Min, b2Min);	//glm_max?
+    float sumSpan = b1Max - b1Min + b2Max - b2Min;
+    if (longSpan <= sumSpan) { 			// Change this to <= for touching but not overlapping as intersection
     	float penetration = sumSpan - longSpan;
 		if (penetration < *depth) {
 			// Always want a normal pointed towards the second box.
 			vec3 direction = GLM_VEC3_ZERO_INIT;
 			glm_vec3_copy(axis, direction);
-			if (aMax > bMax) {
+			if (b1Max > b2Max) {
 				glm_vec3_negate(direction);
 			}
 

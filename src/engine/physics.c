@@ -16,6 +16,8 @@ void ComputePositionPlayer(Player *player, double dt) {
 		ApplyGroundResistance(player->velLeft, dt);
 		ApplyGroundResistance(player->velBack, dt);
 		ApplyGroundResistance(player->velUp, dt);
+		ApplyGroundResistance(player->velMoveNormal, dt);
+		ApplyGroundResistance(player->velMoveAir, dt);
 	} else {
 		ApplyAirResistance(player->velFoward, dt);
 		ApplyAirResistance(player->velFowardNormal, dt);
@@ -26,6 +28,8 @@ void ComputePositionPlayer(Player *player, double dt) {
 		ApplyAirResistance(player->velBack, dt);
 		ApplyAirResistance(player->velBackNormal, dt);
 		ApplyAirResistance(player->velUp, dt);
+		ApplyAirResistance(player->velMoveNormal, dt);
+		ApplyAirResistance(player->velMoveAir, dt);
 	}
 	float magnitudeFront = glm_vec3_norm(player->velFoward);
 	float magnitudeSideR = glm_vec3_norm(player->velRight);
@@ -66,10 +70,15 @@ void ComputePositionPlayer(Player *player, double dt) {
 	glm_vec3_scale(player->velLeft, magnitudeSideL, player->velLeft);
 	glm_vec3_scale(player->velRight, magnitudeSideR, player->velRight);
 
-	//glm_vec3_add(player->velFoward, player->velBack, player->velFront);
-	//glm_vec3_add(player->velLeft, player->velRight, player->velSide);
+	//glm_vec3_add(player->velFoward, player->velMove, player->velMove);
+	glm_vec3_add(player->velFoward, player->velBack, player->velMove);
+	glm_vec3_add(player->velMove, player->velRight, player->velMove);
+	glm_vec3_add(player->velLeft, player->velMove, player->velMove);
+
+	//glm_vec3_add(player->velMove, player->velMoveNormal, player->velMoveNormal);
 
 	vec3 movementSum = GLM_VEC3_ZERO_INIT;
+	/*
 	if (player->velFowardNormal[3] > 0) {
 		glm_vec3_add(movementSum, player->velFowardNormal, movementSum);
 	} else {
@@ -90,6 +99,13 @@ void ComputePositionPlayer(Player *player, double dt) {
 	} else {
 		glm_vec3_add(movementSum, player->velRight, movementSum);
 	}
+	*/
+	if (player->in_air) {
+		glm_vec3_add(player->velMove, player->velMoveNormal, player->velMoveNormal);
+		glm_vec3_copy(player->velMoveNormal, player->velMoveAir);
+		player->velMoveAir[1] = 0.0f;
+	}
+	glm_vec3_add(movementSum, player->velMoveNormal, movementSum);
 
 
 	vec3 rightVecProj = GLM_VEC3_ZERO_INIT;
@@ -104,7 +120,9 @@ void ComputePositionPlayer(Player *player, double dt) {
 
 	if (magTot < glm_vec3_norm(movementSum)) {
 		glm_vec3_normalize(movementSum);
+		glm_vec3_normalize(player->velMoveNormal);
 		glm_vec3_scale(movementSum, magTot, movementSum);
+		glm_vec3_scale(player->velMoveNormal, magTot, player->velMoveNormal);
 	}
 
 	//if (magTot >= glm_vec3_norm(movementSum)) {
@@ -153,6 +171,9 @@ void ComputePositionPlayer(Player *player, double dt) {
 	printf("player->velLeft: %f %f %f\n", player->velLeft[0], player->velLeft[1], player->velLeft[2]);
 	printf("player->velBack: %f %f %f\n", player->velBack[0], player->velBack[1], player->velBack[2]);
 	printf("player->velUp: %f %f %f\n", player->velUp[0], player->velUp[1], player->velUp[2]);
+
+	printf("player->velMove: %f %f %f\n", player->velMove[0], player->velMove[1], player->velMove[2]);
+	printf("player->velMoveNormal: %f %f %f\n", player->velMoveNormal[0], player->velMoveNormal[1], player->velMoveNormal[2]);
 	if (player->coords[1] < -20.0f) {
 		player->velUp[1] = 0.0f;
 		player->coords[0] = 0.0f;
@@ -213,6 +234,7 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 	player->velUpNormal[3] = 0;
 
 	if (OOBvOBBCollisionSATStatic(&player->box, &obj->box, out) == true) {
+		printf("collided with obj->id = %d\n", obj->ID);
 		glm_vec3_copy(out, result);
 		glm_vec3_scale(result, -out[3], result);
 
@@ -247,23 +269,63 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			//player->velocity[1] = 0.0f;
 			//player->velUp[1] = 0.0f;
 		}
-		///*
 		vec3 projectionOrthogonal = GLM_VEC3_ZERO_INIT;
-		//glm_vec3_proj(player->velocity, out, projectionOrthogonal);
-		//glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
-		//glm_vec3_add(projectionOrthogonal, player->velocity, player->velocity);
+
 
 		//forward
-		vec3 tmp1 = GLM_VEC3_ZERO_INIT;
-		//glm_vec3_negate(out);
-		//out[0] = -out[0];
-		//out[1] = -out[1];
-		//out[2] = -out[2];
-		printf("out: %f %f %f\n", out[0], out[1], out[2]);
-		printf("b4 forw: %f, %f, %f\n", player->velFoward[0], player->velFoward[1], player->velFoward[2]);
+		vec3 velIn = GLM_VEC3_ZERO_INIT;
+		//printf("out: %f %f %f\n", out[0], out[1], out[2]);
+		//printf("b4 forw: %f, %f, %f\n", player->velFoward[0], player->velFoward[1], player->velFoward[2]);
+		glm_vec3_add(player->velMove, player->velMoveAir, player->velMove);
+		printf("velMoveAir: %f, %f, %f\n", player->velMoveAir[0], player->velMoveAir[1], player->velMoveAir[2]);
 
+		if ((out[1]) < 0.0f) {	//now it's up (currently on incline)
+			printf("case incline\n");
+			vec3 tmp = GLM_VEC3_ZERO_INIT;
+			//glm_vec3_copy(out, tmp);
+			float angle_diff = glm_deg(glm_vec3_angle(out, player->velMove));
+			glm_vec3_copy(player->velMove, player->velMoveNormal);
+
+			if (player->velMove[0] != 0.0f || player->velMove[2] != 0.0f) {
+				glm_vec3_cross(player->velMove, out, tmp);
+				glm_vec3_rotate(player->velMoveNormal, glm_rad(angle_diff - 90.0f), tmp);
+				//player->velMoveNormal[3] = 1;	//true;
+			}
+			//player->velMove[1] = 0.0f;
+		} else if ((out[1]) > 0.0f) {	//write it so that we ignore the y of out vector for our calc.
+			printf("case below\n");
+
+			vec3 tmp = GLM_VEC3_ZERO_INIT;
+			glm_vec3_copy(out, tmp);
+			tmp[1] = 0.0f;
+			glm_vec3_normalize(tmp);
+			if (glm_deg(glm_vec3_angle(tmp, player->velMove)) >= 90.0f) {
+				glm_vec3_copy(player->velMove, player->velMoveNormal);
+			} else {
+				glm_vec3_proj(player->velMove, tmp, projectionOrthogonal);	//glm_vec3_proj(v, u, out)	// proj_u(v) == out
+				glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
+				projectionOrthogonal[1] = 0.0f;
+				glm_vec3_add(projectionOrthogonal, player->velMove, player->velMoveNormal);
+				//glm_vec3_copy(player->velMoveNormal, player->velMove);
+				//player->velMove[1] = 0.0f;
+				//player->velMoveNormal[3] = 1;	//true;
+			}
+		} else {	//it's 0.0f
+			if (glm_deg(glm_vec3_angle(out, player->velMove)) >= 90.0f) {
+				printf("case zero 90 deg away\n");
+				glm_vec3_copy(player->velMove, player->velMoveNormal);	//maybe rework
+			} else {
+				printf("case zero\n");
+				glm_vec3_copy(GLM_VEC3_ZERO, projectionOrthogonal);
+				glm_vec3_proj(player->velMove, out, projectionOrthogonal);	//glm_vec3_proj(v, u, out)	// proj_u(v) == out
+				glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
+				glm_vec3_add(projectionOrthogonal, player->velMove, player->velMoveNormal);
+				//player->velMoveNormal[3] = 1;	//true;
+			}
+		}
+		printf("after norm: %f, %f, %f\n", player->velMoveNormal[0], player->velMoveNormal[1], player->velMoveNormal[2]);
 		//fine algo (cap lmao) but need to figure out how to deal with micro non collisions
-		///*
+		/*
 		if ((out[1]) < 0.0f) {	//now it's up (currently on incline)
 			vec3 tmp = GLM_VEC3_ZERO_INIT;
 			//glm_vec3_copy(out, tmp);
@@ -275,6 +337,7 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 				glm_vec3_rotate(player->velFowardNormal, glm_rad(angle_diff - 90.0f), tmp);
 				player->velFowardNormal[3] = 1;	//true;
 			}
+			//player->velFoward[1] = 0.0f;
 		} else if ((out[1]) > 0.0f) {	//write it so that we ignore the y of out vector for our calc.
 			vec3 tmp = GLM_VEC3_ZERO_INIT;
 			glm_vec3_copy(out, tmp);
@@ -285,19 +348,21 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			projectionOrthogonal[1] = 0.0f;
 			glm_vec3_add(projectionOrthogonal, player->velFoward, player->velFowardNormal);
 			glm_vec3_copy(player->velFowardNormal, player->velFoward);
+			player->velFoward[1] = 0.0f;
 			player->velFowardNormal[3] = 1;	//true;
 		} else {	//it's 0.0f
 			if (glm_deg(glm_vec3_angle(out, player->velFoward)) >= 90.0f) {
 				glm_vec3_copy(player->velFoward, player->velFowardNormal);
 				printf("true!!!\n");
 			} else {
+				glm_vec3_copy(GLM_VEC3_ZERO, projectionOrthogonal);
 				glm_vec3_proj(player->velFoward, out, projectionOrthogonal);	//glm_vec3_proj(v, u, out)	// proj_u(v) == out
 				glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
 				glm_vec3_add(projectionOrthogonal, player->velFoward, player->velFowardNormal);
 				player->velFowardNormal[3] = 1;	//true;
 			}
 		}
-		//*/
+
 		//glm_vec3_proj(player->velFoward, out, projectionOrthogonal);	//glm_vec3_proj(v, u, out)	// proj_u(v) == out
 		//glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
 		//glm_vec3_add(projectionOrthogonal, player->velFoward, player->velFoward);
@@ -351,6 +416,7 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 		//glm_vec3_add(projectionOrthogonal, player->velBack, player->velBackNormal);
 
 		player->velBackNormal[3] = 1;
+		*/
 
 		//up
 		printf("up: %f\n", player->velUp[1]);
@@ -375,6 +441,7 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			glm_vec3_add(projectionOrthogonal, player->velUp, player->velUp);
 			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
 			player->velUp[1] = 0.0f;
+			//player->jumping = false;
 			//player->in_air = false;
 		} else {
 			glm_vec3_proj(player->velUp, out, projectionOrthogonal);
@@ -385,10 +452,11 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			//player->velUp[0] = 0.0f;
 			//player->velUp[2] = 0.0f;
 			//player->in_air = false;
+			//player->jumping = true;
 		}
 		player->velUpNormal[3] = 1.0f;
 
-
+		/*
 		//left
 		if ((out[1]) < 0.0f) {	//now it's up (currently on incline)
 			vec3 tmp = GLM_VEC3_ZERO_INIT;
@@ -460,7 +528,7 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 				player->velRightNormal[3] = 1;	//true;
 			}
 		}
-
+		*/
 		//glm_vec3_proj(player->velRight, out, projectionOrthogonal);
 		//glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
 		//glm_vec3_add(projectionOrthogonal, player->velRight, player->velRight);
@@ -476,6 +544,7 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 		printf("player->velLeftNormal: %f %f %f\n", player->velLeftNormal[0], player->velLeftNormal[1], player->velLeftNormal[2]);
 		printf("player->velBackNormal: %f %f %f\n", player->velBackNormal[0], player->velBackNormal[1], player->velBackNormal[2]);
 		printf("player->velUpNormal: %f %f %f\n", player->velUpNormal[0], player->velUpNormal[1], player->velUpNormal[2]);
+
 		//have player inherit velocity of object
 		//*/
 
@@ -488,5 +557,43 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 void EvaluatePositionPlayerPostCollision(Player *player, double dt) {
 
 }
+
+
+/*	//saving for later.
+		if ((out[1]) < 0.0f) {	//now it's up (currently on incline)
+			vec3 tmp = GLM_VEC3_ZERO_INIT;
+			//glm_vec3_copy(out, tmp);
+			float angle_diff = glm_deg(glm_vec3_angle(out, player->velFoward));
+			glm_vec3_copy(player->velFoward, player->velFowardNormal);
+
+			if (player->velFoward[0] != 0.0f || player->velFoward[2] != 0.0f) {
+				glm_vec3_cross(player->velFoward, out, tmp);
+				glm_vec3_rotate(player->velFowardNormal, glm_rad(angle_diff - 90.0f), tmp);
+				player->velFowardNormal[3] = 1;	//true;
+			}
+		} else if ((out[1]) > 0.0f) {	//write it so that we ignore the y of out vector for our calc.
+			vec3 tmp = GLM_VEC3_ZERO_INIT;
+			glm_vec3_copy(out, tmp);
+			tmp[1] = 0.0f;
+			glm_vec3_normalize(tmp);
+			glm_vec3_proj(player->velFoward, tmp, projectionOrthogonal);	//glm_vec3_proj(v, u, out)	// proj_u(v) == out
+			glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
+			projectionOrthogonal[1] = 0.0f;
+			glm_vec3_add(projectionOrthogonal, player->velFoward, player->velFowardNormal);
+			glm_vec3_copy(player->velFowardNormal, player->velFoward);
+			player->velFowardNormal[3] = 1;	//true;
+		} else {	//it's 0.0f
+			if (glm_deg(glm_vec3_angle(out, player->velFoward)) >= 90.0f) {
+				glm_vec3_copy(player->velFoward, player->velFowardNormal);
+				printf("true!!!\n");
+			} else {
+				glm_vec3_copy(GLM_VEC3_ZERO, projectionOrthogonal);
+				glm_vec3_proj(player->velFoward, out, projectionOrthogonal);	//glm_vec3_proj(v, u, out)	// proj_u(v) == out
+				glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
+				glm_vec3_add(projectionOrthogonal, player->velFoward, player->velFowardNormal);
+				player->velFowardNormal[3] = 1;	//true;
+			}
+		}
+*/
 
 

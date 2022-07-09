@@ -1,9 +1,5 @@
 #include "mesh.h"
 
-//#include <objgl2/objgl2.h>
-//#include <objgl2/objgl2.c>
-//I really don't want to but i need to include the c file
-
 Mesh meshList[2];	//only tri and cubes
 
 void initRender() {

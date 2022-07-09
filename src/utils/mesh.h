@@ -1,13 +1,11 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include <glad/glad.h>
+#include <glad/glad.h>	//"../../Dependencies/glad/include/glad/glad.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
-/* define TINYOBJ_LOADER_C_IMPLEMENTATION for only *one* .c */
-//#define TINYOBJ_LOADER_C_IMPLEMENTATION
-#include <tinyobjloader/tinyobj_loader_c.h>
+
 #include "../gfx/shader.h"
 #include "../engine/OBB.h"
 

@@ -4,7 +4,8 @@
 #include "gfx/window.h"
 
 int main(void) {
-	if (!Window_init(1920, 1080, "GLFW/OPENGL PROJ")) {
+
+	if (!Window_init(1920, 1080, "PL4TFORM")) {
 		printf("window diff\n");
 		return 1;
 	} else {

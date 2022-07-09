@@ -13,6 +13,7 @@ typedef struct Player {
 	float height;
 
 	vec3 velocity;
+	vec3 velMove;
 	vec3 velAdded;
 
 	vec3 velFoward;
@@ -27,10 +28,8 @@ typedef struct Player {
 	vec4 velBackNormal;
 	vec4 velUpNormal;
 
-	vec3 velFront;
-	vec3 velSide;
-	vec3 velFrontNormal;
-	vec3 velSideNormal;
+	vec3 velMoveNormal;
+	vec3 velMoveAir;
 
 	vec3 prev_velocity;
 	struct OBB box;
