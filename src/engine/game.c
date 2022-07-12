@@ -32,26 +32,21 @@ void initWorld() {
 	player.height = 0.5f;
 	initOBB(&player.box, player.coords, player.width, player.height, player.width, (vec3){0.0f, 1.0f, 0.0f}, 90.0f);
 
-	vec3 objPositions[10] = {	//figure out game objects / collision / try triangle - done
+	vec3 objPositions[] = {	//figure out game objects / collision / try triangle - done
 	    { 0.0f, 0.45f,  0.0f},
 	    { 0.0f, 1.0f, 0.0f},
 	    {5.0f, 1.0f, 5.0f},
 	    {-5.0f, 1.0f, 5.0f},
 		{5.0f, 1.0f, -5.0f},
-		{-5.0f, 1.0f, -5.0f},
-		{0.0f, 1.0f, 8.0f},
-		{8.0f, 1.0f, 0.0f},
-		{-8.0f, 1.0f, 0.5f},
-		{3.0f, 1.0f, -0.5f},
 	};
 
 	addObj(meshType_cube, false, objPositions[0], (vec3){20.0f, 0.1f, 20.0f}, (vec3){1.0f, 0.0f, 0.0f}, 0.0f, 0);
 
-	for (int i = 1; i < 10; i++) {
+	for (int i = 1; i < 5; i++) {
 		//if (i % 2 == 0) {
 			//addObj(meshType_triangle, true, objPositions[i], (vec3){1.5f, 1.0f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, rand() % 91, i);
 		//} else {
-		if (i == 9) {
+		if (i == 1) {
 			addObj(meshType_cube, true, objPositions[i], (vec3){1.0f, 1.0f, 1.0f}, (vec3){0.0f, 1.0f, 0.0f}, 45.0f, i);
 		} else {
 			vec3 tmp = {0.0f, 0.1f, 0.0f};
@@ -76,9 +71,39 @@ void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, fl
 	glm_vec3_copy(scale, ex.scale_dim);
 	glm_vec3_copy(rot_axis, ex.orientation_axis);
 	ex.rotation = angle;
-	glm_vec3_copy(GLM_VEC3_ZERO, ex.velocity);
+	//glm_vec3_copy(GLM_VEC3_ZERO, ex.velocity);
 	//OBB
 	initOBB(&ex.box, coords, scale[0]/2.0f, scale[1]/2.0f, scale[2]/2.0f, ex.orientation_axis, angle);
+	if (one_txt == true) {
+		ex.velFunc = &updateObjVelFuncXZCircle;
+	} else {
+		ex.velFunc = NULL;
+	}
+	glm_vec3_zero(ex.velocity);
 
 	world.objList[world.objCount - 1] = ex;	//(Object){.type = t, .one_txture = one_txt, .coordinates = coords, .scale_dim = scale};
+}
+
+void updateObj(Object* obj, float dt, float float_tick) {
+	//needs other updates like obj vel update.
+	if (obj->velFunc != NULL) {
+		obj->velFunc(float_tick, 0.0f, 3.0f, obj->velocity);
+	}
+
+	obj->coordinates[0] += dt * obj->velocity[0];
+	obj->coordinates[1] += dt * obj->velocity[1];
+	obj->coordinates[2] += dt * obj->velocity[2];
+	updateOBBPos(&obj->box, obj->coordinates);
+}
+
+void updateObjVelFuncXZCircle(float float_tick, float offset, float r, vec3 ret) { //circle xz axis
+	glm_vec3_copy((vec3){r * cos(glm_rad(float_tick + offset)), 0.0f, r * sin(glm_rad(float_tick + offset))}, ret);
+}
+
+void updateObjVelFuncXYZCircle(float float_tick, float offset, float r, vec3 ret) {
+	glm_vec3_copy((vec3){r * cos(glm_rad(float_tick + offset)), r * cos(glm_rad(float_tick + offset)), r * sin(glm_rad(float_tick + offset))}, ret);
+}
+
+void updateObjVelFuncLinear(float float_tick, float offset, float r, vec3 ret) {
+	glm_vec3_copy((vec3){r * sin(glm_rad(float_tick + offset)), r * sin(glm_rad(float_tick + offset)), r * sin(glm_rad(float_tick + offset))}, ret);
 }

@@ -33,23 +33,23 @@ A reach/extra additions list, listed in no particular order.
 
 # File Directory
 ```bash
-|-Debug
+|-Debug/
 	|-//out files / exe
-|-Dependencies
-	|-cglm
-	|-glad
-	|-GLFW
+|-Dependencies/
+	|-cglm/
+	|-glad/
+	|-GLFW/
 	|-stb_image.h
-|-Resources
+|-Resources/
 	|-Game textures
-|-src
-	|-engine
+|-src/
+	|-engine/
 		|-//engine files like obb collision detection, physics, and world
-	|-entity
+	|-entity/
 		|-//game objects and player
-	|-gfx
+	|-gfx/
 		|-//shader, window, glad files (visuals)
-	|-utils
+	|-utils/
 		|-//extra files as helpers.
 	|-pl4tform.c
 |-README.md

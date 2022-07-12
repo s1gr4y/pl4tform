@@ -14,6 +14,10 @@ typedef struct World_State {
 
 void initWorld();
 void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, float angle, unsigned int index);
+void updateObj(Object* obj, float dt, float float_tick);
+void updateObjVelFuncXZCircle(float float_tick, float offset, float r, vec3 ret);
+void updateObjVelFuncXYZCircle(float float_tick, float offset, float r, vec3 ret);
+void updateObjVelFuncLinear(float float_tick, float offset, float r, vec3 ret);
 
 extern World_State world;
 extern Player player;

@@ -135,6 +135,7 @@ void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *i
 	//glEnable(GL_TEXTURE_2D);
 	generateTexture(mesh, 0, "Resources/Textures/container.jpg");	//need to figure out why texture no work T_T; 6/17
 	generateTexture(mesh, 1, "Resources/Textures/crate.png");
+	generateTexture(mesh, 2, "Resources/Textures/dev_64.png");
 	//glUniform1f(glGetUniformLocation(programID, "mixer"), 0.5f);
 	mesh->indexSize = indexSize;
 }
@@ -212,21 +213,21 @@ void drawObject(struct Object obj, unsigned int pID) {
 	// draw model
 	Mesh mesh = meshList[obj.type];
 	mat4 model;
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mesh.txture[0]);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, mesh.txture[1]);
+	for (int i = 0; i < 3; i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, mesh.txture[i]);
+	}
 	glBindVertexArray(mesh.VAO);
 	glm_mat4_identity(model);
 	glm_translate(model, obj.coordinates);
 	glm_rotate(model, glm_rad(obj.rotation), obj.orientation_axis);
 	glm_scale(model, obj.scale_dim);
 	if (obj.one_txture == true) {
-		glUniform1i(glGetUniformLocation(pID, "texture1"), 1);
-		glUniform1i(glGetUniformLocation(pID, "texture2"), 1);
+		glUniform1i(glGetUniformLocation(pID, "texture1"), 2);
+		glUniform1i(glGetUniformLocation(pID, "texture2"), 2);
 		glUniform1f(glGetUniformLocation(pID, "mixer"), 1.0f);
 	} else {
-		glUniform1i(glGetUniformLocation(pID, "texture1"), 0);
+		glUniform1i(glGetUniformLocation(pID, "texture1"), 1);
 		glUniform1i(glGetUniformLocation(pID, "texture2"), 1);
 		glUniform1f(glGetUniformLocation(pID, "mixer"), 0.5f);
 	}

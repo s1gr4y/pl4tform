@@ -23,7 +23,7 @@ typedef enum {
 typedef struct Mesh {
 	//  render data
 	unsigned int VAO, VBO, EBO;
-	unsigned int txture[2];
+	unsigned int txture[3];
 	// mesh data, all arrs
 	//struct Vertex *vertices;
 	float *vertices;
@@ -49,6 +49,7 @@ typedef struct Object {	//needs orientation (vec3 rotation and axis)
 	meshType type;
 	bool one_txture;
 	vec3 velocity;
+	void (*velFunc)(float, float, float, vec3);
 	vec3 coordinates;
 	vec3 scale_dim;
 	vec3 orientation_axis;
@@ -56,9 +57,6 @@ typedef struct Object {	//needs orientation (vec3 rotation and axis)
 	float rotation;	//in deg
 } Object;
 
-//don't have classes here (:
-//Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures);
-//void Draw(Shader &shader);
 void initRender();
 void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *indices, unsigned int indexSize);
 void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_name);

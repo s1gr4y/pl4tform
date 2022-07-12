@@ -59,7 +59,7 @@ int Window_init(int wid, int high, char* title) {
 	//mat4[0][3] == 0, mat4[3][0] == 4
 
 	glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSwapInterval(1);	//1 for vsync, 0 not
+	glfwSwapInterval(0);	//1 for vsync, 0 not
 	int temp_high, temp_wid = 0;
 	get_resolution(&temp_wid, &temp_high);
 	glfwSetWindowPos(window.handle, (temp_wid-window.wid)/2, (temp_high-window.high)/2); //set the window position to mid
@@ -273,10 +273,13 @@ void window_loop() {
 		//player.camera.cameraPos[1] += 1.5f;
 		bool isColliding = false;
 		for (int i = 0; i < world.objCount; i++) {
+			updateObj(&world.objList[i], window.dt, window.tick_float);
+		}
+		for (int i = 0; i < world.objCount; i++) {
 			if (i != 0) {
 				//world.objList[i].rotation = fmod(world.objList[i].rotation + window.dt * TICK_RATE, 360.0f);
 				//world.objList[i].coordinates[0] = 15 * sin(glm_rad(window.tick_float));	//need a sudo +=
-				updateOBB(&world.objList[i].box, world.objList[i].coordinates, world.objList[i].scale_dim[0]/2.0f, world.objList[i].scale_dim[1]/2.0f, world.objList[i].scale_dim[2]/2.0f, world.objList[i].orientation_axis, world.objList[i].rotation);
+				//updateOBB(&world.objList[i].box, world.objList[i].coordinates, world.objList[i].scale_dim[0]/2.0f, world.objList[i].scale_dim[1]/2.0f, world.objList[i].scale_dim[2]/2.0f, world.objList[i].orientation_axis, world.objList[i].rotation);
 			}
 			if (ComputeResolveCollisions(&player, &world.objList[i], window.dt * TICK_RATE)) {
 				isColliding = true;
@@ -289,6 +292,7 @@ void window_loop() {
 
 		if (player.in_air) {
 			printf("in air ___________________________\n");
+			//this was why it worked...
 			glm_vec3_copy(player.velFowardNormal, player.velFoward);
 			glm_vec3_copy(player.velBackNormal, player.velBack);
 			glm_vec3_copy(player.velLeftNormal, player.velLeft);
