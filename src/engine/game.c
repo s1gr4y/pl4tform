@@ -75,7 +75,7 @@ void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, fl
 	//OBB
 	initOBB(&ex.box, coords, scale[0]/2.0f, scale[1]/2.0f, scale[2]/2.0f, ex.orientation_axis, angle);
 	if (one_txt == true) {
-		ex.velFunc = &updateObjVelFuncXZCircle;
+		ex.velFunc = &updateObjVelFuncLinear; //&updateObjVelFuncLinearFlat;	//updateObjVelFuncXZCircle
 	} else {
 		ex.velFunc = NULL;
 	}
@@ -87,12 +87,12 @@ void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, fl
 void updateObj(Object* obj, float dt, float float_tick) {
 	//needs other updates like obj vel update.
 	if (obj->velFunc != NULL) {
-		obj->velFunc(float_tick, 0.0f, 3.0f, obj->velocity);
+		obj->velFunc(float_tick, 0.0f, 0.01f, obj->velocity);
 	}
 
-	obj->coordinates[0] += dt * obj->velocity[0];
-	obj->coordinates[1] += dt * obj->velocity[1];
-	obj->coordinates[2] += dt * obj->velocity[2];
+	obj->coordinates[0] += dt * TICK_RATE * obj->velocity[0];
+	obj->coordinates[1] += dt * TICK_RATE * obj->velocity[1];
+	obj->coordinates[2] += dt * TICK_RATE * obj->velocity[2];
 	updateOBBPos(&obj->box, obj->coordinates);
 }
 
@@ -107,3 +107,8 @@ void updateObjVelFuncXYZCircle(float float_tick, float offset, float r, vec3 ret
 void updateObjVelFuncLinear(float float_tick, float offset, float r, vec3 ret) {
 	glm_vec3_copy((vec3){r * sin(glm_rad(float_tick + offset)), r * sin(glm_rad(float_tick + offset)), r * sin(glm_rad(float_tick + offset))}, ret);
 }
+
+void updateObjVelFuncLinearFlat(float float_tick, float offset, float r, vec3 ret) {
+	glm_vec3_copy((vec3){r * sin(glm_rad(float_tick + offset)), 0.0f, r * sin(glm_rad(float_tick + offset))}, ret);
+}
+

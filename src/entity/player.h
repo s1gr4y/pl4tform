@@ -8,6 +8,7 @@ typedef struct Player {
 	vec3 coords;	//derived from camera somewhat
 	bool in_air;
 	bool jumping;
+	bool was_grounded;
 	float mass;
 	float width;
 	float height;
@@ -30,6 +31,7 @@ typedef struct Player {
 
 	vec3 velMoveNormal;
 	vec3 velMoveAir;
+	vec3 velAddedNormal;
 
 	vec3 prev_velocity;
 	struct OBB box;
