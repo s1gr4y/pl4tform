@@ -5,7 +5,7 @@ const double CAM_SPEED = 1.5f/66.0f;
 //struct Camera camera;
 
 void Camera_init(Camera *camera) {
-	glm_vec3_copy((vec3){-1.0f, 5.5f, 0.0f}, camera->cameraPos);
+	glm_vec3_copy((vec3){0.0f, 5.5f, 0.0f}, camera->cameraPos);
 	glm_vec3_copy((vec3){0.0f, 0.0f, 1.0f}, camera->cameraFront);
 	glm_vec3_copy((vec3){0.0f, 1.0f, 0.0f}, camera->cameraUp);
 	glm_vec3_copy((vec3){0.0f, 0.0f, 1.0f}, camera->direction);

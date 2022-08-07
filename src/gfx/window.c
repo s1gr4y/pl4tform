@@ -119,10 +119,10 @@ void action_callback() {
 		temp[2] = sin(glm_rad(player.camera.theta)) * (window.dt * CAM_SPEED) * TICK_RATE;
 		//glm_vec3_add(player.velocity, temp, player.velocity);
 		if (player.in_air == false) {
-			glm_vec3_add(player.velFoward, temp, player.velFoward);
+			glm_vec3_add(player.velMove, temp, player.velMove);
 		} else {
 			glm_vec3_scale(temp, 0.2f, temp);
-			glm_vec3_add(player.velFoward, temp, player.velFoward);
+			glm_vec3_copy(temp, player.velMoveAir);
 		}
 	}
 	if (window.keyboard.keys[GLFW_KEY_S]) {
@@ -133,10 +133,11 @@ void action_callback() {
 		temp[2] = sin(glm_rad(player.camera.theta)) * (window.dt * CAM_SPEED) * TICK_RATE;
 		//glm_vec3_sub(player.velocity, temp, player.velocity);
 		if (player.in_air == false) {
-			glm_vec3_sub(player.velBack, temp, player.velBack);
+			glm_vec3_sub(player.velMove, temp, player.velMove);
 		} else {
 			glm_vec3_scale(temp, 0.2f, temp);
-			glm_vec3_sub(player.velBack, temp, player.velBack);
+			glm_vec3_negate(temp);
+			glm_vec3_copy(temp, player.velMoveAir);
 		}
 	}
 	if (window.keyboard.keys[GLFW_KEY_A]) {
@@ -148,10 +149,11 @@ void action_callback() {
 		glm_vec3_scale(temp, (window.dt * CAM_SPEED) * TICK_RATE, temp);
 		//glm_vec3_sub(player.velocity, temp, player.velocity);
 		if (player.in_air == false) {
-			glm_vec3_sub(player.velLeft, temp, player.velLeft);
+			glm_vec3_sub(player.velMove, temp, player.velMove);
 		} else {
 			glm_vec3_scale(temp, 0.2f, temp);
-			glm_vec3_sub(player.velLeft, temp, player.velLeft);
+			glm_vec3_negate(temp);
+			glm_vec3_copy(temp, player.velMoveAir);
 		}
 	}
 	if (window.keyboard.keys[GLFW_KEY_D]) {
@@ -163,10 +165,10 @@ void action_callback() {
 		glm_vec3_scale(temp, (window.dt * CAM_SPEED) * TICK_RATE, temp);
 		//glm_vec3_add(player.velocity, temp, player.velocity);
 		if (player.in_air == false) {
-			glm_vec3_add(player.velRight, temp, player.velRight);
+			glm_vec3_add(player.velMove, temp, player.velMove);
 		} else {
 			glm_vec3_scale(temp, 0.2f, temp);
-			glm_vec3_add(player.velRight, temp, player.velRight);
+			glm_vec3_copy(temp, player.velMoveAir);
 		}
 	}
 	if (window.keyboard.keys[GLFW_KEY_SPACE] && player.in_air == false && player.jumping == false) {	// && player.in_air == true?	//so we don't inf jump but lol y not.
@@ -176,9 +178,24 @@ void action_callback() {
 		//glm_vec3_add(player.velocity, temp, player.velocity);
 		glm_vec3_copy(temp, player.velUp);
 		//player.in_air = true;
+		vec3 tmp2 = GLM_VEC3_ZERO_INIT;
+		glm_vec3_copy(player.velMoveNormal, tmp2);
+		tmp2[1] = 0.0f;
+		glm_vec3_copy(tmp2, player.velMove);
 		player.jumping = true;
-		//printf("AAAAAAAAAAAAAAAAA: %f, %f, %f\n", player.velUp[0], player.velUp[1], player.velUp[2]);
+		printf("JUMPING: %f, %f, %f\n", player.velUp[0], player.velUp[1], player.velUp[2]);
 	}
+	if (player.in_air == false) {
+		ApplyGroundResistance(player.velMove, window.dt * TICK_RATE);
+	} else {
+		ApplyAirResistance(player.velMove, window.dt * TICK_RATE);
+	}
+	float maxSpeed = CAM_SPEED * 2.5;
+	if (glm_vec3_norm(player.velMove) >= maxSpeed) {
+		glm_normalize(player.velMove);
+		glm_vec3_scale(player.velMove, maxSpeed, player.velMove);
+	}
+
 }
 
 void mouse_callback(GLFWwindow* handle, double xpos, double ypos) {
@@ -237,6 +254,8 @@ void window_loop() {
 	glm_perspective(glm_rad(90.0f), (float)window.wid / (float)window.high, 0.1f, 100.0f, projection);
 
 	while(!glfwWindowShouldClose(window.handle)) {
+		glfwPollEvents();
+		action_callback();
 
 		//get delta time
 		window.curr_time = glfwGetTime();
@@ -267,7 +286,6 @@ void window_loop() {
 	    //player.coords[1] += window.dt * TICK_RATE * player.velocity[1];
 	    //player.coords[2] += window.dt * TICK_RATE * player.velocity[2];
 
-	    printf("b4 player->velLeft: %f %f %f\n", player.velLeft[0], player.velLeft[1], player.velLeft[2]);
 		//tmp remove l8r
 		//glm_vec3_copy(player.coords, world.objList[9].coordinates);
 		//player.camera.cameraPos[1] += 1.5f;
@@ -290,22 +308,6 @@ void window_loop() {
 			printf("not colliding......................\n");
 		}
 
-		if (player.in_air) {
-			printf("in air ___________________________\n");
-			//this was why it worked...
-			glm_vec3_copy(player.velFowardNormal, player.velFoward);
-			glm_vec3_copy(player.velBackNormal, player.velBack);
-			glm_vec3_copy(player.velLeftNormal, player.velLeft);
-			glm_vec3_copy(player.velRightNormal, player.velRight);
-			//glm_vec3_copy(player.velUpNormal, player.velUp);
-			//player.velFowardNormal[3] = 0;
-			//player.velBackNormal[3] = 0;
-			//player.velUpNormal[3] = 0;
-		} else {
-			//glm_vec3_copy(player.velUpNormal, player.velUp);
-			//player.velUpNormal[3] = 0;
-		}
-
 		//calc_orientation(&player.camera);
 		//ComputePositionPlayer(&player, window.dt * TICK_RATE);
 		calc_orientation(&player.camera);
@@ -323,8 +325,6 @@ void window_loop() {
 		}
 		printf("coords: %f, %f, %f\n", player.coords[0], player.coords[1], player.coords[2]);
 		//printf("theta: %f, phi %f\n", player.camera.theta, player.camera.phi);
-		glfwPollEvents();
-		action_callback();
 		glfwSwapBuffers(window.handle);
 	}
 
