@@ -76,8 +76,8 @@ void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, fl
 	//OBB
 	initOBB(&ex.box, coords, scale[0]/2.0f, scale[1]/2.0f, scale[2]/2.0f, ex.orientation_axis, angle);
 	if (one_txt == true) {
-		//ex.velFunc = &updateObjVelFuncLinear; //&updateObjVelFuncLinearFlat;	//updateObjVelFuncXZCircle
-		ex.velFunc = NULL;
+		ex.velFunc = &updateObjVelFuncLinear; //&updateObjVelFuncLinearFlat;	//updateObjVelFuncXZCircle
+		//ex.velFunc = NULL;
 	} else {
 		ex.velFunc = NULL;
 	}

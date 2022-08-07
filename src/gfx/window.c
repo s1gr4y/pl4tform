@@ -122,7 +122,7 @@ void action_callback() {
 			glm_vec3_add(player.velMove, temp, player.velMove);
 		} else {
 			glm_vec3_scale(temp, 0.2f, temp);
-			glm_vec3_copy(temp, player.velMoveAir);
+			glm_vec3_add(player.velMoveNormal, temp, player.velMoveNormal);
 		}
 	}
 	if (window.keyboard.keys[GLFW_KEY_S]) {
@@ -137,7 +137,7 @@ void action_callback() {
 		} else {
 			glm_vec3_scale(temp, 0.2f, temp);
 			glm_vec3_negate(temp);
-			glm_vec3_copy(temp, player.velMoveAir);
+			glm_vec3_add(player.velMoveNormal, temp, player.velMoveNormal);
 		}
 	}
 	if (window.keyboard.keys[GLFW_KEY_A]) {
@@ -153,7 +153,7 @@ void action_callback() {
 		} else {
 			glm_vec3_scale(temp, 0.2f, temp);
 			glm_vec3_negate(temp);
-			glm_vec3_copy(temp, player.velMoveAir);
+			glm_vec3_add(player.velMoveNormal, temp, player.velMoveNormal);
 		}
 	}
 	if (window.keyboard.keys[GLFW_KEY_D]) {
@@ -168,7 +168,7 @@ void action_callback() {
 			glm_vec3_add(player.velMove, temp, player.velMove);
 		} else {
 			glm_vec3_scale(temp, 0.2f, temp);
-			glm_vec3_copy(temp, player.velMoveAir);
+			glm_vec3_add(player.velMoveNormal, temp, player.velMoveNormal);
 		}
 	}
 	if (window.keyboard.keys[GLFW_KEY_SPACE] && player.in_air == false && player.jumping == false) {	// && player.in_air == true?	//so we don't inf jump but lol y not.
@@ -194,6 +194,10 @@ void action_callback() {
 	if (glm_vec3_norm(player.velMove) >= maxSpeed) {
 		glm_normalize(player.velMove);
 		glm_vec3_scale(player.velMove, maxSpeed, player.velMove);
+	}
+	if (glm_vec3_norm(player.velMoveNormal) >= maxSpeed) {
+		glm_normalize(player.velMoveNormal);
+		glm_vec3_scale(player.velMoveNormal, maxSpeed, player.velMoveNormal);
 	}
 
 }
