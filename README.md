@@ -2,6 +2,10 @@
 
 A simple 3D platforming game made in C and OpenGL. It is expected that the gameplay will play similar to a basic platformer with nice movement.
 
+### Preview
+
+![thumbnail](README_imgs/game_beta_movingObjs.png)
+
 ### Current Features
 - Basic movement in the ground/air
 - Uses SAT algorithm and OBBs for collision detection
@@ -10,7 +14,7 @@ A simple 3D platforming game made in C and OpenGL. It is expected that the gamep
 
 ### To Be Implemented
 A TODO list, listed in order of importance and/or utility, top to bottom.
-1. Resolve player velocity in the advent of moving objects (including rotation)
+1. Resolve player velocity in the advent of moving objects (including rotation) -partially resolved, needs fixing
 2. Coarse Grid for smart pre-check collision detection rather than check all objects
 3. Code Refactor with comments for clarity/efficiency.
 
@@ -40,6 +44,7 @@ A reach/extra additions list, listed in no particular order.
 	|-glad/
 	|-GLFW/
 	|-stb_image.h
+|-README_imgs/
 |-Resources/
 	|-Game textures
 |-src/

@@ -27,7 +27,8 @@ void ComputePositionPlayer(Player *player, double dt) {
 
 	vec3 movementSum = GLM_VEC3_ZERO_INIT;
 	if (player->in_air == true) {
-		vec3 tmp = GLM_VEC3_ZERO_INIT;
+		vec3 tmp = GLM_VEC3_ZERO_INIT;	//maybe make velAdded as "remembered velocity" like after calc, say velAdded = velocity
+		glm_vec3_copy(player->velMove, player->velMoveNormal);
 		glm_vec3_add(player->velAdded, player->velMoveNormal, tmp);
 		glm_vec3_copy(tmp, player->velocity);
 		/*
@@ -143,7 +144,8 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 		vec3 position_diff = GLM_VEC3_ZERO_INIT;
 		glm_vec3_sub(player->coords, obj->coordinates, position_diff);
 		float angle_diff = glm_vec3_angle(obj->velocity, position_diff);
-		if (obj->velocity[0] != 0.0f && obj->velocity[1] != 0.0f && obj->velocity[2] != 0.0f) {
+		if (obj->velocity[0] != 0.0f || obj->velocity[1] != 0.0f || obj->velocity[2] != 0.0f) {
+			//printf("pos diff is: %f\n", position_diff[1]);
 			if (position_diff[1] >= player->height || (angle_diff < 90.0f && position_diff[1] >= -player->height)) {	//player is on top relative to vel (height is the measure)
 				glm_vec3_add(player->velAdded, obj->velocity, player->velAdded);
 			}
@@ -257,34 +259,35 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 		//up
 		printf("B4 vel up is %f\n", player->velUp[1]);
 		//if (player->velUp[1] <= 0.0f) {
-			if (sign >= 0.0f && angle >= 45.0f) { //need to think of way to have better incline physics...
+		printf("sign: %f, angle: %f\n", sign, angle);
+		if (sign >= 0.0f && angle >= 45.0f) { //need to think of way to have better incline physics...
 
-				vec3 tmp = GLM_VEC3_ZERO_INIT;
-				glm_vec3_copy(player->velUp, tmp);
-				glm_vec3_proj(tmp, out, projectionOrthogonal);
-				glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
-				projectionOrthogonal[0] = 0.0f;
-				//projectionOrthogonal[1] /= 8.0f;	//think about it...
-				projectionOrthogonal[2] = 0.0f;
-				//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
-				glm_vec3_add(projectionOrthogonal, player->velUp, player->velUp);
-				//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
-				if (!player->jumping) {
-					//player->velUp[1] = 0.0f;
-				}
-				//player->jumping = false;
-				//player->in_air = false;
-			} else {
-				glm_vec3_proj(player->velUp, out, projectionOrthogonal);
-				glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
-				//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
-				glm_vec3_add(projectionOrthogonal, player->velUp, player->velUp);
-				//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
-				//player->velUp[0] = 0.0f;
-				//player->velUp[2] = 0.0f;
-				//player->in_air = false;
-				//player->jumping = true;
+			vec3 tmp = GLM_VEC3_ZERO_INIT;
+			glm_vec3_copy(player->velUp, tmp);
+			glm_vec3_proj(tmp, out, projectionOrthogonal);
+			glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
+			projectionOrthogonal[0] = 0.0f;
+			//projectionOrthogonal[1] /= 8.0f;	//think about it...
+			projectionOrthogonal[2] = 0.0f;
+			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
+			glm_vec3_add(projectionOrthogonal, player->velUp, player->velUp);
+			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
+			if (!player->jumping) {
+				//player->velUp[1] = 0.0f;
 			}
+			//player->jumping = false;
+			//player->in_air = false;
+		} else if (player->velUp[1] <= 0.0f) {	//on incline (resets gravity velocity)
+			glm_vec3_proj(player->velUp, out, projectionOrthogonal);
+			glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
+			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
+			glm_vec3_add(projectionOrthogonal, player->velUp, player->velUp);
+			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
+			//player->velUp[0] = 0.0f;
+			//player->velUp[2] = 0.0f;
+			//player->in_air = false;
+			//player->jumping = true;
+		}
 		//}
 		printf("BS vel up is %f\n", player->velUp[1]);
 		player->velUpNormal[3] = 1.0f;
