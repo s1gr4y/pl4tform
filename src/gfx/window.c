@@ -1,10 +1,4 @@
 #include "window.h"
-//#include "shader.h"
-#include "../entity/camera.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#include <cglm/cglm.h>   /* for inline */
-//#include <cglm/call.h>   /* for library call (this also includes cglm.h) */
 
 // global window
 struct Window window;
@@ -59,7 +53,7 @@ int Window_init(int wid, int high, char* title) {
 	//mat4[0][3] == 0, mat4[3][0] == 4
 
 	glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSwapInterval(1);	//1 for vsync, 0 not
+	glfwSwapInterval(0);	//1 for vsync, 0 not
 	int temp_high, temp_wid = 0;
 	get_resolution(&temp_wid, &temp_high);
 	glfwSetWindowPos(window.handle, (temp_wid-window.wid)/2, (temp_high-window.high)/2); //set the window position to mid

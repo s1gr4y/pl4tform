@@ -11,12 +11,11 @@ A simple 3D platforming game made in C and OpenGL. It is expected that the gamep
 - Uses SAT algorithm and OBBs for collision detection
 - Movement physics response such as resistance and changed velocity on slopes
 
-
 ### To Be Implemented
 A TODO list, listed in order of importance and/or utility, top to bottom.
 1. Resolve player velocity in the advent of moving objects (including rotation) -partially resolved, needs fixing
 2. Coarse Grid for smart pre-check collision detection rather than check all objects
-3. Code Refactor with comments for clarity/efficiency.
+3. Code Refactor with comments for clarity/efficiency (somewhat complete).
 
 ### Potential Features
 A reach/extra additions list, listed in no particular order.
@@ -35,9 +34,23 @@ A reach/extra additions list, listed in no particular order.
 - SPACE: Jump
 - ESC: Quit
 
+# How to build
+It can be built with cmake. You can install CMake here: [Link](https://cmake.org/install/)\
+The minimum CMake version is 3.0 but lower versions could work if you change the requirements in CMakeLists.txt.\
+Windows specific notes:\
+If you want to use mingw compiler rather than .NET/Microsoft compiler, do the following:\
+```cmake -G "MinGW Makefiles" .```\
+```make```\
+General steps:\
+In your preferred terminal, in the platform/ directory
+1. Enter "cmake ."
+2. Enter "cmake --build ."
+
+And there you go! The output is built in the pl4tform/bin directory, including the source images, glfw dll, and the program.
+
 # File Directory
 ```bash
-|-Debug/
+|-bin/
 	|-//out files / exe
 |-Dependencies/
 	|-cglm/
@@ -54,6 +67,8 @@ A reach/extra additions list, listed in no particular order.
 		|-//game objects and player
 	|-gfx/
 		|-//shader, window, glad files (visuals)
+	|-include/
+		|-//all .h files
 	|-utils/
 		|-//extra files as helpers.
 	|-pl4tform.c

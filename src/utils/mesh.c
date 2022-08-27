@@ -1,5 +1,8 @@
 #include "mesh.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "../../Dependencies/stb_image.h"
+
 Mesh meshList[2];	//only tri and cubes
 
 void initRender() {

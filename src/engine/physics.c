@@ -249,7 +249,7 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 				glm_vec3_copy(GLM_VEC3_ZERO, projectionOrthogonal);
 				glm_vec3_proj(player->velMove, out, projectionOrthogonal);	//glm_vec3_proj(v, u, out)	// proj_u(v) == out
 				glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
-				glm_vec3_add(projectionOrthogonal, player->velMove, player->velMoveNormal);
+				glm_vec3_add(projectionOrthogonal, player->velMove, player->velMove);	//last parm player->velMoveNormal
 				//player->velMoveNormal[3] = 1;	//true;
 			}
 		}
