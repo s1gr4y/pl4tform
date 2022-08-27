@@ -5,12 +5,16 @@ cmake_minimum_required(VERSION 3.0)
 project(pl4tform VERSION 1.0
                 DESCRIPTION "pl4tform"
                 LANGUAGES C)
-# Set the output folder where your program will be created
+
+#Spawn bin upon build
+file(MAKE_DIRECTORY ${directory} bin)
+
+#Set the output folder where the program will be created in bin
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
-# The following folder will be included
+#The following folders will be included
 include_directories("${PROJECT_SOURCE_DIR}/Dependencies")
 include_directories("${PROJECT_SOURCE_DIR}/Dependencies/GLFW/include/GLFW")
 include_directories("${PROJECT_SOURCE_DIR}/Dependencies/glad/include")
@@ -25,9 +29,11 @@ file(GLOB SOURCES	"src/engine/*.c"
 
 add_executable(pl4tform ${SOURCES})
 
+#Link the libraries
 target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3dll.a)	#one of these might not be needed
 target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3.a)
 
+#Copy the dll and Resources to the output folder
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/glfw3.dll ${CMAKE_BINARY_DIR} COPYONLY)
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
