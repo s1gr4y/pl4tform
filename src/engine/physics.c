@@ -139,15 +139,23 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 
 		printf("collided with obj->id = %d\n", obj->ID);
 		printf("obj->vel = %f, %f, %f\n", obj->velocity[0], obj->velocity[1], obj->velocity[2]);
-
+		float max = obj->scale_dim[0];
+		if (max < obj->scale_dim[1]) {
+			max = obj->scale_dim[1];
+		}
+		if (max < obj->scale_dim[2]) {
+			max = obj->scale_dim[2];
+		}
 		//change amount added...
 		vec3 position_diff = GLM_VEC3_ZERO_INIT;
 		glm_vec3_sub(player->coords, obj->coordinates, position_diff);
 		float angle_diff = glm_vec3_angle(obj->velocity, position_diff);
 		if (obj->velocity[0] != 0.0f || obj->velocity[1] != 0.0f || obj->velocity[2] != 0.0f) {
-			//printf("pos diff is: %f\n", position_diff[1]);
-			if (position_diff[1] >= player->height || (angle_diff < 90.0f && position_diff[1] >= -player->height)) {	//player is on top relative to vel (height is the measure)
+			printf("pos diff height is: %f\n", position_diff[1]);	//(position_diff[1] >= player->height || (angle_diff < 90.0f && position_diff[1] >= -player->height))
+			printf("plyer height: %f\n", player->height);
+			if (position_diff[1] >= (player->height*2) - 0.1f && -out[1] >= 0.5f) {	//player is on top relative to vel (height is the measure)
 				glm_vec3_add(player->velAdded, obj->velocity, player->velAdded);
+				printf("applied add vel!!!!!!!!!!!\n");
 			}
 		}
 
@@ -185,7 +193,7 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			player->in_air = false;
 			player->velMove[0] = player->velocity[0];
 			player->velMove[2] = player->velocity[2];
-		} else if (out[1] < 0.0f && player->velUp[1] < 0.0f) {
+		} else if (out[1] < 0.0f && player->velUp[1] <= 0.0f) {
 			if (!player->jumping) {
 				//player->velUp[1] = 0.0f;
 				player->in_air = false;
@@ -262,8 +270,8 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 		printf("B4 vel up is %f\n", player->velUp[1]);
 		//if (player->velUp[1] <= 0.0f) {
 		printf("sign: %f, angle: %f\n", sign, angle);
-		if (sign >= 0.0f && angle >= 45.0f) { //need to think of way to have better incline physics...
-
+		if ((sign >= 0.0f && angle >= 45.0f)) { //need to think of way to have better incline physics...
+			printf("reset UP on incline 1\n");
 			vec3 tmp = GLM_VEC3_ZERO_INIT;
 			glm_vec3_copy(player->velUp, tmp);
 			glm_vec3_proj(tmp, out, projectionOrthogonal);
@@ -279,7 +287,8 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			}
 			//player->jumping = false;
 			//player->in_air = false;
-		} else if (player->velUp[1] <= 0.0f) {	//on incline (resets gravity velocity)
+		} else if (player->velUp[1] <= 0.0f && sign >= 0.0f) {	//on incline (resets gravity velocity)
+			printf("reset UP on incline 2\n");
 			glm_vec3_proj(player->velUp, out, projectionOrthogonal);
 			glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
 			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
@@ -289,8 +298,21 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			//player->velUp[2] = 0.0f;
 			//player->in_air = false;
 			//player->jumping = true;
+		} else if (player->velUp[1] >= 0.0f && sign < 0.0f) {	//under obj, jumping
+			printf("reset UP under 3;;;;;;;;;\n");
+			glm_vec3_proj(player->velUp, out, projectionOrthogonal);
+			glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
+			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
+			glm_vec3_add(projectionOrthogonal, player->velUp, player->velUp);
+			player->velUp[1] = fabs(player->velUp[1]);
+			player->velUp[1] = -player->velUp[1];
 		}
-		//}
+		/*else {	//under object case?
+			glm_vec3_proj(player->velUp, out, projectionOrthogonal);
+			glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
+			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
+			glm_vec3_add(projectionOrthogonal, player->velUp, player->velUp);
+		}*/
 		printf("BS vel up is %f\n", player->velUp[1]);
 		player->velUpNormal[3] = 1.0f;
 
