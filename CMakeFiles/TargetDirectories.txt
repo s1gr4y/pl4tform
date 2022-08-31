@@ -1,3 +1,0 @@
-C:/Users/Boris/Desktop/programming/pl4tform/CMakeFiles/pl4tform.dir
-C:/Users/Boris/Desktop/programming/pl4tform/CMakeFiles/edit_cache.dir
-C:/Users/Boris/Desktop/programming/pl4tform/CMakeFiles/rebuild_cache.dir
