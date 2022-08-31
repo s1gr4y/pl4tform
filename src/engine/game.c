@@ -89,7 +89,7 @@ void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, fl
 void updateObj(Object* obj, float dt, float float_tick) {
 	//needs other updates like obj vel update.
 	if (obj->velFunc != NULL) {
-		obj->velFunc(float_tick, 0.0f, 0.01f, obj->velocity);
+		obj->velFunc(float_tick, 0.0f, 0.02f, obj->velocity);
 	}
 
 	obj->coordinates[0] += dt * TICK_RATE * obj->velocity[0];

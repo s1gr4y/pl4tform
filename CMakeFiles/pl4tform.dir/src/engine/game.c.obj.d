@@ -1,0 +1,71 @@
+CMakeFiles/pl4tform.dir/src/engine/game.c.obj: \
+ C:\Users\Boris\Desktop\programming\pl4tform\src\engine\game.c \
+ C:/Users/Boris/Desktop/programming/pl4tform/src/include/game.h \
+ c:\users\boris\desktop\programming\pl4tform\src\include\mesh.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\glad\include\glad\glad.h \
+ C:/Users/Boris/Desktop/programming/pl4tform/Dependencies/glad/include/KHR/khrplatform.h \
+ c:\mingw\lib\gcc\mingw32\6.3.0\include\stdint.h \
+ c:\mingw\include\stdint.h c:\mingw\include\_mingw.h \
+ c:\mingw\include\msvcrtver.h c:\mingw\include\w32api.h \
+ c:\mingw\include\sdkddkver.h \
+ c:\mingw\lib\gcc\mingw32\6.3.0\include\stddef.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\glfw\include\glfw\glfw3.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\cglm.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\common.h \
+ c:\mingw\include\math.h c:\mingw\lib\gcc\mingw32\6.3.0\include\float.h \
+ c:\mingw\include\float.h \
+ c:\mingw\lib\gcc\mingw32\6.3.0\include\stdbool.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\types.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\simd/intrin.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\vec2.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\util.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\vec2-ext.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\vec3.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\vec4.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\vec4-ext.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\vec3-ext.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\mat4.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\mat3.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\mat2.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\affine.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\affine-mat.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\cam.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\plane.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\clipspace/persp.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\common.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\plane.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\mat4.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\clipspace/ortho_rh_no.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\clipspace/persp_rh_no.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\clipspace/persp.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\clipspace/view_rh_no.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\clipspace/view_rh.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\frustum.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\quat.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\euler.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\box.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\color.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\io.h \
+ c:\mingw\include\stdio.h c:\mingw\include\sys/types.h \
+ c:\mingw\lib\gcc\mingw32\6.3.0\include\stdarg.h \
+ c:\mingw\include\stdlib.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\project.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\clipspace/project_no.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\vec3.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\vec4.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\sphere.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\ease.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\curve.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\bezier.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\ray.h \
+ c:\users\boris\desktop\programming\pl4tform\dependencies\cglm\affine2d.h \
+ c:\users\boris\desktop\programming\pl4tform\src\include\shader.h \
+ c:\users\boris\desktop\programming\pl4tform\src\include\obb.h \
+ c:\mingw\include\string.h c:\mingw\include\strings.h \
+ c:\mingw\include\wchar.h \
+ c:\users\boris\desktop\programming\pl4tform\src\include\player.h \
+ c:\users\boris\desktop\programming\pl4tform\src\include\camera.h \
+ c:\users\boris\desktop\programming\pl4tform\src\include\physics.h \
+ c:\users\boris\desktop\programming\pl4tform\src\include\player.h \
+ c:\users\boris\desktop\programming\pl4tform\src\include\mesh.h \
+ c:\users\boris\desktop\programming\pl4tform\src\include\OBB.h

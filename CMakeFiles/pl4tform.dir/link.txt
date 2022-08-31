@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\pl4tform.dir/objects.a
+C:\MinGW\bin\ar.exe qc CMakeFiles\pl4tform.dir/objects.a @CMakeFiles\pl4tform.dir\objects1.rsp
+C:\MinGW\bin\gcc.exe -Wl,--whole-archive CMakeFiles\pl4tform.dir/objects.a -Wl,--no-whole-archive -o bin\pl4tform.exe -Wl,--out-implib,bin\libpl4tform.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\pl4tform.dir\linklibs.rsp
