@@ -27,10 +27,14 @@ void ComputePositionPlayer(Player *player, double dt) {
 
 	vec3 movementSum = GLM_VEC3_ZERO_INIT;
 	if (player->in_air == true) {
+		printf("in AIR velAdded: %f, %f, %f\n", player->velAdded[0], player->velAdded[1], player->velAdded[2]);
 		vec3 tmp = GLM_VEC3_ZERO_INIT;	//maybe make velAdded as "remembered velocity" like after calc, say velAdded = velocity
+		glm_vec3_add(player->velAdded, player->velMove, player->velMove);
 		glm_vec3_copy(player->velMove, player->velMoveNormal);
-		glm_vec3_add(player->velAdded, player->velMoveNormal, tmp);
+		glm_vec3_copy(player->velMoveNormal, tmp);
+		//glm_vec3_add(player->velAdded, player->velMoveNormal, tmp);
 		glm_vec3_copy(tmp, player->velocity);
+		glm_vec3_copy(GLM_VEC3_ZERO, player->velAdded);
 		/*
 		glm_vec3_add(player->velAdded, player->velocity, player->velocity);
 		glm_vec3_add(player->velocity, player->velMoveNormal, tmp);
@@ -77,10 +81,11 @@ void ComputePositionPlayer(Player *player, double dt) {
 
 	glm_vec3_copy(player->coords, player->camera.cameraPos);
 	updateOBBPos(&player->box, player->coords);
-	glm_vec3_copy(GLM_VEC3_ZERO, player->velAdded);
+	//glm_vec3_copy(GLM_VEC3_ZERO, player->velAdded);
 	//glm_vec3_copy(GLM_VEC3_ZERO, player->velMoveNormal);
 	glm_vec3_copy(GLM_VEC3_ZERO, player->velMoveAir);
 	player->is_colliding = false;
+	player->resetVelAdded = false;
 	printf("vel player after: %f, %f, %f\n", player->velocity[0], player->velocity[1], player->velocity[2]);
 	//player->camera.cameraPos[1] = player->camera.cameraPos[1] + 0.5f;
 }
@@ -153,7 +158,11 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 		if (obj->velocity[0] != 0.0f || obj->velocity[1] != 0.0f || obj->velocity[2] != 0.0f) {
 			printf("pos diff height is: %f\n", position_diff[1]);	//(position_diff[1] >= player->height || (angle_diff < 90.0f && position_diff[1] >= -player->height))
 			printf("plyer height: %f\n", player->height);
-			if (position_diff[1] >= (player->height*2) - 0.1f && -out[1] >= 0.5f) {	//player is on top relative to vel (height is the measure)
+			if (position_diff[1] >= (player->height*2) - 0.05f && -out[1] >= 0.5f) {	//player is on top relative to vel (height is the measure)
+				if (player->resetVelAdded == false) {
+					player->resetVelAdded = true;
+					glm_vec3_copy(GLM_VEC3_ZERO, player->velAdded);
+				}
 				glm_vec3_add(player->velAdded, obj->velocity, player->velAdded);
 				printf("applied add vel!!!!!!!!!!!\n");
 			}

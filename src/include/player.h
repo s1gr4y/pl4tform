@@ -6,6 +6,7 @@
 typedef struct Player {
 	Camera camera;
 	vec3 coords;	//derived from camera somewhat
+	bool resetVelAdded;
 	bool in_air;
 	bool jumping;
 	bool is_colliding;

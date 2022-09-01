@@ -101,6 +101,7 @@ static void key_callback(GLFWwindow* handle, int key, int scancode, int action, 
 
 //for quaternions here...
 void action_callback() {
+	float maxSpeed = CAM_SPEED * 2.5;
 	// if key is pressed down do stuff.
 	if (window.keyboard.keys[GLFW_KEY_ESCAPE]) {
 		glfwSetWindowShouldClose(window.handle, GLFW_TRUE);
@@ -112,6 +113,15 @@ void action_callback() {
 		temp[0] = cos(glm_rad(player.camera.theta)) * (window.dt * CAM_SPEED) * TICK_RATE;
 		temp[2] = sin(glm_rad(player.camera.theta)) * (window.dt * CAM_SPEED) * TICK_RATE;
 		//glm_vec3_add(player.velocity, temp, player.velocity);
+		if (glm_vec3_norm(player.velMove) >= maxSpeed) {
+			vec3 temp2;
+			glm_vec3_zero(temp2);
+			glm_vec3_copy(player.velMove, temp2);
+			glm_vec3_normalize(temp2);
+			float f = glm_vec3_norm(temp);
+			glm_vec3_scale(temp2, f, temp2);
+			glm_vec3_sub(player.velMove, temp2, player.velMove);
+		}
 		if (player.in_air == false) {
 			glm_vec3_add(player.velMove, temp, player.velMove);
 		} else {
@@ -127,6 +137,15 @@ void action_callback() {
 		temp[0] = cos(glm_rad(player.camera.theta)) * (window.dt * CAM_SPEED) * TICK_RATE;
 		temp[2] = sin(glm_rad(player.camera.theta)) * (window.dt * CAM_SPEED) * TICK_RATE;
 		//glm_vec3_sub(player.velocity, temp, player.velocity);
+		if (glm_vec3_norm(player.velMove) >= maxSpeed) {
+			vec3 temp2;
+			glm_vec3_zero(temp2);
+			glm_vec3_copy(player.velMove, temp2);
+			glm_vec3_normalize(temp2);
+			float f = glm_vec3_norm(temp);
+			glm_vec3_scale(temp2, f, temp2);
+			glm_vec3_sub(player.velMove, temp2, player.velMove);
+		}
 		if (player.in_air == false) {
 			glm_vec3_sub(player.velMove, temp, player.velMove);
 		} else {
@@ -144,6 +163,15 @@ void action_callback() {
 		glm_normalize(temp);
 		glm_vec3_scale(temp, (window.dt * CAM_SPEED) * TICK_RATE, temp);
 		//glm_vec3_sub(player.velocity, temp, player.velocity);
+		if (glm_vec3_norm(player.velMove) >= maxSpeed) {
+			vec3 temp2;
+			glm_vec3_zero(temp2);
+			glm_vec3_copy(player.velMove, temp2);
+			glm_vec3_normalize(temp2);
+			float f = glm_vec3_norm(temp);
+			glm_vec3_scale(temp2, f, temp2);
+			glm_vec3_sub(player.velMove, temp2, player.velMove);
+		}
 		if (player.in_air == false) {
 			glm_vec3_sub(player.velMove, temp, player.velMove);
 		} else {
@@ -161,6 +189,15 @@ void action_callback() {
 		glm_normalize(temp);
 		glm_vec3_scale(temp, (window.dt * CAM_SPEED) * TICK_RATE, temp);
 		//glm_vec3_add(player.velocity, temp, player.velocity);
+		if (glm_vec3_norm(player.velMove) >= maxSpeed) {
+			vec3 temp2;
+			glm_vec3_zero(temp2);
+			glm_vec3_copy(player.velMove, temp2);
+			glm_vec3_normalize(temp2);
+			float f = glm_vec3_norm(temp);
+			glm_vec3_scale(temp2, f, temp2);
+			glm_vec3_sub(player.velMove, temp2, player.velMove);
+		}
 		if (player.in_air == false) {
 			glm_vec3_add(player.velMove, temp, player.velMove);
 		} else {
@@ -188,8 +225,8 @@ void action_callback() {
 	} else {
 		ApplyAirResistance(player.velMove, window.dt * TICK_RATE);
 	}
-	float maxSpeed = CAM_SPEED * 2.5;
-	if (glm_vec3_norm(player.velMove) >= maxSpeed) {
+	///*
+	/*if (glm_vec3_norm(player.velMove) >= maxSpeed) {
 		glm_normalize(player.velMove);
 		glm_vec3_scale(player.velMove, maxSpeed, player.velMove);
 	}
@@ -197,6 +234,7 @@ void action_callback() {
 		glm_normalize(player.velMoveNormal);
 		glm_vec3_scale(player.velMoveNormal, maxSpeed, player.velMoveNormal);
 	}
+	*/
 
 }
 
@@ -282,7 +320,7 @@ void window_loop() {
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	    //glUseProgram(programID);
-	    ComputePositionPlayer(&player, window.dt * TICK_RATE);
+	    //ComputePositionPlayer(&player, window.dt * TICK_RATE);
 
 	    //player.coords[0] += window.dt * TICK_RATE * player.velocity[0];
 	    //player.coords[1] += window.dt * TICK_RATE * player.velocity[1];
@@ -311,7 +349,7 @@ void window_loop() {
 		}
 
 		//calc_orientation(&player.camera);
-		//ComputePositionPlayer(&player, window.dt * TICK_RATE);
+		ComputePositionPlayer(&player, window.dt * TICK_RATE);
 		calc_orientation(&player.camera);
 
 
