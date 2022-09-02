@@ -53,7 +53,7 @@ int Window_init(int wid, int high, char* title) {
 	//mat4[0][3] == 0, mat4[3][0] == 4
 
 	glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSwapInterval(0);	//1 for vsync, 0 not
+	glfwSwapInterval(1);	//1 for vsync, 0 not
 	int temp_high, temp_wid = 0;
 	get_resolution(&temp_wid, &temp_high);
 	glfwSetWindowPos(window.handle, (temp_wid-window.wid)/2, (temp_high-window.high)/2); //set the window position to mid
@@ -320,7 +320,7 @@ void window_loop() {
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	    //glUseProgram(programID);
-	    //ComputePositionPlayer(&player, window.dt * TICK_RATE);
+	    ComputePositionPlayer(&player, window.dt * TICK_RATE);
 
 	    //player.coords[0] += window.dt * TICK_RATE * player.velocity[0];
 	    //player.coords[1] += window.dt * TICK_RATE * player.velocity[1];
@@ -349,7 +349,7 @@ void window_loop() {
 		}
 
 		//calc_orientation(&player.camera);
-		ComputePositionPlayer(&player, window.dt * TICK_RATE);
+		//ComputePositionPlayer(&player, window.dt * TICK_RATE);
 		calc_orientation(&player.camera);
 
 

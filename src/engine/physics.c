@@ -50,11 +50,6 @@ void ComputePositionPlayer(Player *player, double dt) {
 		glm_vec3_copy(tmp, player->velocity);
 	}
 
-	if (player->velUp[1] < 0.0f && fabs(player->velUp[1]) >= fabs(GRAVITY * 40)) {
-		player->velUp[1] = GRAVITY * 40;
-	} else {
-		player->velUp[1] += dt * GRAVITY;
-	}
 	printf("vel up is %f\n", player->velUp[1]);
 	//player->velocity[1] += player->velUp[1];
 	//glm_vec3_add(player->velocity, player->velUp, player->velocity);
@@ -77,6 +72,12 @@ void ComputePositionPlayer(Player *player, double dt) {
 		player->coords[0] = 0.0f;
 		player->coords[1] = 5.0f;
 		player->coords[2] = 0.0f;
+	}
+
+	if (player->velUp[1] < 0.0f && fabs(player->velUp[1]) >= fabs(GRAVITY * 40)) {
+		player->velUp[1] = GRAVITY * 40;
+	} else {
+		player->velUp[1] += dt * GRAVITY;
 	}
 
 	glm_vec3_copy(player->coords, player->camera.cameraPos);
@@ -196,12 +197,12 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			updateOBBPos(&player->box, player->coords);
 		}
 
-		if (out[1] < 0.0f && player->velUp[1] < 0.0f && player->in_air == true) {	//&& player->velUp[1] < 0.0f
-			//player->velocity[1] = 0.0f;
+		if (out[1] < 0.0f && player->velUp[1] <= 0.0f) {	//player->in_air == true	//&& player->velUp[1] < 0.0f
+			//player->velocity[1] = 0.0f;	//THIS TAKES VEL AND PUTS TO VELMOVE
 			//player->velUp[1] = 0.0f;
 			player->in_air = false;
-			player->velMove[0] = player->velocity[0];
-			player->velMove[2] = player->velocity[2];
+			//player->velMove[0] = player->velocity[0];
+			//player->velMove[2] = player->velocity[2];
 		} else if (out[1] < 0.0f && player->velUp[1] <= 0.0f) {
 			if (!player->jumping) {
 				//player->velUp[1] = 0.0f;
