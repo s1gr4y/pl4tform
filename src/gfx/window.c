@@ -53,7 +53,7 @@ int Window_init(int wid, int high, char* title) {
 	//mat4[0][3] == 0, mat4[3][0] == 4
 
 	glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSwapInterval(1);	//1 for vsync, 0 not
+	glfwSwapInterval(0);	//1 for vsync, 0 not
 	int temp_high, temp_wid = 0;
 	get_resolution(&temp_wid, &temp_high);
 	glfwSetWindowPos(window.handle, (temp_wid-window.wid)/2, (temp_high-window.high)/2); //set the window position to mid
@@ -268,7 +268,7 @@ void mouse_callback(GLFWwindow* handle, double xpos, double ypos) {
 		player.camera.phi = -89.9f;
 	//*/
 
-	calc_orientation(&player.camera);
+	//calc_orientation(&player.camera);
 }
 
 void window_loop() {
@@ -292,7 +292,7 @@ void window_loop() {
 	mat4 projection;
 	glm_mat4_identity(projection);
 	glm_perspective(glm_rad(90.0f), (float)window.wid / (float)window.high, 0.1f, 100.0f, projection);
-
+	
 	while(!glfwWindowShouldClose(window.handle)) {
 		glfwPollEvents();
 		action_callback();
@@ -320,7 +320,7 @@ void window_loop() {
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	    //glUseProgram(programID);
-	    ComputePositionPlayer(&player, window.dt * TICK_RATE);
+	    //ComputePositionPlayer(&player, window.dt * TICK_RATE);
 
 	    //player.coords[0] += window.dt * TICK_RATE * player.velocity[0];
 	    //player.coords[1] += window.dt * TICK_RATE * player.velocity[1];
@@ -329,10 +329,15 @@ void window_loop() {
 		//tmp remove l8r
 		//glm_vec3_copy(player.coords, world.objList[9].coordinates);
 		//player.camera.cameraPos[1] += 1.5f;
+		
+		//Update obj pos
+		//for (int i = 0; i < world.objCount; i++) {	//need to move obj later so vel doesn't missalign, but our model and obj aren't in sync
+		//	updateObjPos(&world.objList[i], window.dt, window.tick_float);
+		//}
+		
+		//UpdatePlayerPos(&player, window.dt * TICK_RATE);
+		
 		bool isColliding = false;
-		for (int i = 0; i < world.objCount; i++) {
-			updateObj(&world.objList[i], window.dt, window.tick_float);
-		}
 		for (int i = 0; i < world.objCount; i++) {
 			if (i != 0) {
 				//world.objList[i].rotation = fmod(world.objList[i].rotation + window.dt * TICK_RATE, 360.0f);
@@ -345,13 +350,35 @@ void window_loop() {
 		}
 		if (!isColliding) {
 			player.in_air = true;
+			player.is_grounded = false;
 			printf("not colliding......................\n");
+		} else {
+		
+			//Update obj vel
+			glm_vec3_zero(player.velAdded);
+			for (int i = 0; i < world.objCount; i++) {	//need to move obj later so vel doesn't missalign, but our model and obj aren't in sync
+				updateObjVel(&world.objList[i], window.dt, window.tick_float);
+				//change player's velAdded
+				if (player.objCollisionList[i] == true) {
+					glm_vec3_add(player.velAdded, world.objList[i].velocity, player.velAdded);
+				}
+				player.objCollisionList[i] = false;
+			}
+		
+		}
+		for (int i = 0; i < world.objCount; i++) {
+			player.objCollisionList[i] = false;
 		}
 
 		//calc_orientation(&player.camera);
-		//ComputePositionPlayer(&player, window.dt * TICK_RATE);
+		ComputePositionPlayer(&player, window.dt * TICK_RATE);
 		calc_orientation(&player.camera);
-
+		
+		//Update obj vel
+		for (int i = 0; i < world.objCount; i++) {	//need to move obj later so vel doesn't missalign, but our model and obj aren't in sync
+			updateObjVel(&world.objList[i], window.dt, window.tick_float);
+			updateObjPos(&world.objList[i], window.dt, window.tick_float);
+		}
 
 		unsigned int viewLoc  = glGetUniformLocation(programID, "view");
 		unsigned int projLoc  = glGetUniformLocation(programID, "projection");
@@ -363,6 +390,7 @@ void window_loop() {
 			//printf("%f, %f, %f\n", world.objList[i].coordinates[0], world.objList[i].coordinates[1], world.objList[i].coordinates[2]);
 		    drawObject(world.objList[i], programID);
 		}
+		
 		printf("coords: %f, %f, %f\n", player.coords[0], player.coords[1], player.coords[2]);
 		//printf("theta: %f, phi %f\n", player.camera.theta, player.camera.phi);
 		glfwSwapBuffers(window.handle);

@@ -48,6 +48,7 @@ typedef struct Object {	//needs orientation (vec3 rotation and axis)
 	unsigned int ID;
 	meshType type;
 	bool one_txture;
+	vec3 futureVel;
 	vec3 velocity;
 	void (*velFunc)(float, float, float, vec3);
 	vec3 coordinates;

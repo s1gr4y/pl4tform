@@ -17,6 +17,7 @@ extern const double AIR_RESISTANCE;
 extern const double GROUND_RESISTANCE;
 
 void ComputePositionObj(Object obj);
+void UpdatePlayerPos(Player *player, double dt);
 void ComputePositionPlayer(Player *player, double dt);
 void ApplyGroundResistance(vec3 vector, double dt);
 void ApplyAirResistance(vec3 vector, double dt);

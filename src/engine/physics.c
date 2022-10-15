@@ -1,16 +1,15 @@
 #include "physics.h"
 
-const double GRAVITY = -0.3f/66.0f;
+const double GRAVITY = -0.4f/66.0f;			//-0.3f/66.0f;
 const double AIR_RESISTANCE = -0.01f/66.0f;	//-0.1f/66.0f;
-const double GROUND_RESISTANCE = -0.15f/66.0f;	//-0.1f/66.0f;
+const double GROUND_RESISTANCE = -0.2f/66.0f;	//-0.1f/66.0f;
 
 void ComputePositionObj(Object obj) {
 	exit(-1);
 }
 
-void ComputePositionPlayer(Player *player, double dt) {
-	//phys mostly done, just need to fix how player gets velocity based on angle relative to obj/obj's velocity
-	printf("vel player start-edt: %f, %f, %f\n", player->velocity[0], player->velocity[1], player->velocity[2]);
+void UpdatePlayerPos(Player *player, double dt) {	//simple position update, collision detection resolves when collision occurs so compute at loop start is fine.
+	//could move resistance here but will see if needed l8r
 	if (player->in_air == false) {
 		ApplyGroundResistance(player->velUp, dt);
 		ApplyGroundResistance(player->velMoveNormal, dt);
@@ -20,6 +19,45 @@ void ComputePositionPlayer(Player *player, double dt) {
 		ApplyAirResistance(player->velMoveNormal, dt);
 		ApplyAirResistance(player->velocity, dt);
 	}
+	vec3 gravityHold = GLM_VEC3_ZERO_INIT;
+	glm_vec3_add(player->velocity, player->velUp, gravityHold);
+
+	player->coords[0] += dt * gravityHold[0];
+	player->coords[1] += dt * gravityHold[1];
+	player->coords[2] += dt * gravityHold[2];
+	
+	if (player->velUp[1] < 0.0f && fabs(player->velUp[1]) >= fabs(GRAVITY * 40)) {
+		player->velUp[1] = GRAVITY * 40;
+	} else {
+		player->velUp[1] += dt * GRAVITY;
+	}
+
+	if (player->coords[1] < -20.0f) {
+		player->velUp[1] = 0.0f;
+		player->coords[0] = 0.0f;
+		player->coords[1] = 5.0f;
+		player->coords[2] = 0.0f;
+	}
+
+	//glm_vec3_copy(player->coords, player->camera.cameraPos);	//update actual cam l8r to avoid visual microstutters
+	updateOBBPos(&player->box, player->coords);
+}
+
+
+void ComputePositionPlayer(Player *player, double dt) {
+	//phys mostly done, just need to fix how player gets velocity based on angle relative to obj/obj's velocity
+	printf("vel player start-edt: %f, %f, %f\n", player->velocity[0], player->velocity[1], player->velocity[2]);
+	///*
+	if (player->in_air == false) {
+		ApplyGroundResistance(player->velUp, dt);
+		ApplyGroundResistance(player->velMoveNormal, dt);
+		ApplyGroundResistance(player->velocity, dt);
+	} else {
+		ApplyAirResistance(player->velUp, dt);
+		ApplyAirResistance(player->velMoveNormal, dt);
+		ApplyAirResistance(player->velocity, dt);
+	}
+	//*/
 
 
 	//glm_vec3_add(player->velMove, player->velMoveNormal, player->velMoveNormal);
@@ -60,6 +98,7 @@ void ComputePositionPlayer(Player *player, double dt) {
 	//glm_vec3_copy(player->velocity, player->prev_velocity);
 
 	//printf("vel adding? %f %f %f\n", player->velocity[0], dt * player->velocity[1], dt * player->velocity[2]);
+	///*
 	vec3 gravityHold = GLM_VEC3_ZERO_INIT;
 	glm_vec3_add(player->velocity, player->velUp, gravityHold);
 
@@ -82,6 +121,9 @@ void ComputePositionPlayer(Player *player, double dt) {
 
 	glm_vec3_copy(player->coords, player->camera.cameraPos);
 	updateOBBPos(&player->box, player->coords);
+	//*/
+	glm_vec3_copy(player->coords, player->camera.cameraPos);
+	
 	//glm_vec3_copy(GLM_VEC3_ZERO, player->velAdded);
 	//glm_vec3_copy(GLM_VEC3_ZERO, player->velMoveNormal);
 	glm_vec3_copy(GLM_VEC3_ZERO, player->velMoveAir);
@@ -152,29 +194,10 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 		if (max < obj->scale_dim[2]) {
 			max = obj->scale_dim[2];
 		}
-		//change amount added...
-		vec3 position_diff = GLM_VEC3_ZERO_INIT;
-		glm_vec3_sub(player->coords, obj->coordinates, position_diff);
-		float angle_diff = glm_vec3_angle(obj->velocity, position_diff);
-		if (obj->velocity[0] != 0.0f || obj->velocity[1] != 0.0f || obj->velocity[2] != 0.0f) {
-			printf("pos diff height is: %f\n", position_diff[1]);	//(position_diff[1] >= player->height || (angle_diff < 90.0f && position_diff[1] >= -player->height))
-			printf("plyer height: %f\n", player->height);
-			if (position_diff[1] >= (player->height*2) - 0.05f && -out[1] >= 0.5f) {	//player is on top relative to vel (height is the measure)
-				if (player->resetVelAdded == false) {
-					player->resetVelAdded = true;
-					glm_vec3_copy(GLM_VEC3_ZERO, player->velAdded);
-				}
-				glm_vec3_add(player->velAdded, obj->velocity, player->velAdded);
-				printf("applied add vel!!!!!!!!!!!\n");
-			}
-		}
-
-		//glm_vec3_add(player->velAdded, obj->velocity, player->velAdded);
-
+		//set up
 		glm_vec3_copy(out, result);
 		glm_vec3_scale(result, -out[3], result);
-
-
+		
 		glm_vec3_normalize(out);
 		vec3 tmpNormalized = GLM_VEC3_ZERO_INIT;
 		tmpNormalized[0] = out[0];	//(player->velUp[1] >= -0.0001f) ? 1.0f : -1.0f;
@@ -183,17 +206,42 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			tmpNormalized[1] = out[1];
 		}
 		glm_vec3_normalize(tmpNormalized);
+		
 		float sign = result[1];
 		float angle = glm_deg(glm_vec3_angle(tmpNormalized, out));
+		
+		if (player->resetVelAdded == false) {
+			printf("reseting velAdded\n");
+			player->resetVelAdded = true;
+			glm_vec3_copy(GLM_VEC3_ZERO, player->velAdded);
+		}
+		
+		//change amount added...
+		vec3 position_diff = GLM_VEC3_ZERO_INIT;
+		glm_vec3_sub(player->coords, obj->coordinates, position_diff);
+		float angle_diff = glm_vec3_angle(obj->velocity, position_diff);
+		if (obj->velocity[0] != 0.0f || obj->velocity[1] != 0.0f || obj->velocity[2] != 0.0f) {
+			printf("pos diff height is: %f\n", position_diff[1]);	//(position_diff[1] >= player->height || (angle_diff < 90.0f && position_diff[1] >= -player->height))
+			printf("plyer height: %f\n", player->height);
+			if (angle >= 45.0f && sign >= 0.0f || (sign >= 0.0f && angle == 0.0f)) {	//player is on top relative to vel (height is the measure) //position_diff[1] >= (player->height*2) - 0.05f
+				player->objCollisionList[obj->ID] = true;
+				glm_vec3_add(player->velAdded, obj->velocity, player->velAdded);
+				//player->velAdded[1] -= 0.05f;	//to make sure it sticks but I doubt this will work/good
+				printf("applied add vel!!!!!!!!!!!\n");
+			}
+		}
+
+		//glm_vec3_add(player->velAdded, obj->velocity, player->velAdded);
+
 		if (sign >= 0.0f && angle >= 45.0f) {	//glm_deg(glm_vec3_angle(tmpNormalized, out)) >= 50.0f //need to add more cases so normal coll works
 			vec3 tmp = GLM_VEC3_ZERO_INIT;
 			tmp[1] = result[1];
 			glm_vec3_add(player->coords, tmp, player->coords);
-			glm_vec3_add(player->camera.cameraPos, tmp, player->camera.cameraPos);
+			//glm_vec3_add(player->camera.cameraPos, tmp, player->camera.cameraPos);
 			updateOBBPos(&player->box, player->coords);
 		} else {
 			glm_vec3_add(player->coords, result, player->coords);
-			glm_vec3_add(player->camera.cameraPos, result, player->camera.cameraPos);
+			//glm_vec3_add(player->camera.cameraPos, result, player->camera.cameraPos);
 			updateOBBPos(&player->box, player->coords);
 		}
 
@@ -224,6 +272,9 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 		//glm_vec3_add(player->velMove, player->velAdded, player->velMove);
 		if ((out[1]) < 0.0f) {	//now it's up (currently on incline)
 			printf("case incline\n");
+			if (!player->jumping) {
+				//player->velUp[1] = 0.0f;
+			}
 			vec3 tmp = GLM_VEC3_ZERO_INIT;
 			//glm_vec3_copy(out, tmp);
 			//player->velMove[1] = 0.0f;	//negate the vertical to see... 7/19
@@ -232,11 +283,16 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			printf("norm is same as velMove: %f, %f, %f\n", player->velMoveNormal[0], player->velMoveNormal[1], player->velMoveNormal[2]);
 
 			if (fabs(player->velMove[0]) != 0.0f || fabs(player->velMove[2]) != 0.0f) {
+				printf("out vector is: %f, %f, %f\n", out[0], out[1], out[2]);
 				glm_vec3_cross(player->velMove, out, tmp);
-				glm_vec3_rotate(player->velMoveNormal, glm_rad(angle_diff - 90.0f), tmp);
+				//glm_vec3_copy(tmp, player->velMoveNormal);	//not correct just here to check what the cross vector is
+				glm_vec3_rotate(player->velMoveNormal, glm_rad(angle_diff - 89.0f), tmp);	//added 0.5f into the ground so we stick to obj on incline going down/up
+				//glm_vec3_rotate(player->velMoveNormal, glm_rad(angle_diff - 90.0f), tmp);
 				printf("here?\n");
 				printf("velMove in incline case: %f, %f, %f\n", player->velMoveNormal[0], player->velMoveNormal[1], player->velMoveNormal[2]);
-				//player->velMoveNormal[3] = 1;	//true;
+				if (!player->jumping) {
+					//player->velUp[1] = -0.05f;	//true;
+				}
 			}
 			//player->velMove[1] = 0.0f;
 		} else if ((out[1]) > 0.0f) {	//write it so that we ignore the y of out vector for our calc.
@@ -270,6 +326,7 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 				glm_vec3_proj(player->velMove, out, projectionOrthogonal);	//glm_vec3_proj(v, u, out)	// proj_u(v) == out
 				glm_vec3_negate(projectionOrthogonal);	//need opposite to add back.
 				glm_vec3_add(projectionOrthogonal, player->velMove, player->velMove);	//last parm player->velMoveNormal
+				glm_vec3_copy(player->velMove, player->velMoveNormal);
 				//player->velMoveNormal[3] = 1;	//true;
 			}
 		}
@@ -292,6 +349,7 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
 			glm_vec3_add(projectionOrthogonal, player->velUp, player->velUp);
 			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
+			//player->velUp[1] = 0.0f;
 			if (!player->jumping) {
 				//player->velUp[1] = 0.0f;
 			}
@@ -305,6 +363,7 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			glm_vec3_add(projectionOrthogonal, player->velUp, player->velUp);
 			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
 			//player->velUp[0] = 0.0f;
+			//player->velUp[1] = -0.04f;
 			//player->velUp[2] = 0.0f;
 			//player->in_air = false;
 			//player->jumping = true;

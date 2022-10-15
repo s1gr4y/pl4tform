@@ -10,6 +10,7 @@ typedef struct Player {
 	bool in_air;
 	bool jumping;
 	bool is_colliding;
+	bool is_grounded;	//on top of something
 	bool was_grounded;
 	float mass;
 	float width;
@@ -37,6 +38,10 @@ typedef struct Player {
 
 	vec3 prev_velocity;
 	struct OBB box;
+	
+	
+	
+	bool* objCollisionList;	//specifically if they get velocity from said obj, 1 yes, 0 no
 } Player;
 
 Player initPlayer(vec3 coords);

@@ -1,6 +1,6 @@
 #include "camera.h"
 
-const double CAM_SPEED = 1.5f/66.0f;
+const double CAM_SPEED = 1.5f/66.0f;	//1.5f
 
 //struct Camera camera;
 
