@@ -10,6 +10,7 @@ void ComputePositionObj(Object obj) {
 
 void UpdatePlayerPos(Player *player, double dt) {	//simple position update, collision detection resolves when collision occurs so compute at loop start is fine.
 	//could move resistance here but will see if needed l8r
+	/*
 	if (player->in_air == false) {
 		ApplyGroundResistance(player->velUp, dt);
 		ApplyGroundResistance(player->velMoveNormal, dt);
@@ -19,25 +20,29 @@ void UpdatePlayerPos(Player *player, double dt) {	//simple position update, coll
 		ApplyAirResistance(player->velMoveNormal, dt);
 		ApplyAirResistance(player->velocity, dt);
 	}
-	vec3 gravityHold = GLM_VEC3_ZERO_INIT;
-	glm_vec3_add(player->velocity, player->velUp, gravityHold);
-
-	player->coords[0] += dt * gravityHold[0];
-	player->coords[1] += dt * gravityHold[1];
-	player->coords[2] += dt * gravityHold[2];
-	
+	*/
 	if (player->velUp[1] < 0.0f && fabs(player->velUp[1]) >= fabs(GRAVITY * 40)) {
 		player->velUp[1] = GRAVITY * 40;
 	} else {
 		player->velUp[1] += dt * GRAVITY;
 	}
+	
+	vec3 gravityHold = GLM_VEC3_ZERO_INIT;
+	//glm_vec3_add(player->velocity, player->velUp, gravityHold);
+	glm_vec3_copy(player->velUp, gravityHold);
 
+	//player->coords[0] += dt * gravityHold[0];
+	player->coords[1] += dt * gravityHold[1];
+	//player->coords[2] += dt * gravityHold[2];
+	
+	/*
 	if (player->coords[1] < -20.0f) {
 		player->velUp[1] = 0.0f;
 		player->coords[0] = 0.0f;
 		player->coords[1] = 5.0f;
 		player->coords[2] = 0.0f;
 	}
+	*/
 
 	//glm_vec3_copy(player->coords, player->camera.cameraPos);	//update actual cam l8r to avoid visual microstutters
 	updateOBBPos(&player->box, player->coords);
@@ -100,7 +105,8 @@ void ComputePositionPlayer(Player *player, double dt) {
 	//printf("vel adding? %f %f %f\n", player->velocity[0], dt * player->velocity[1], dt * player->velocity[2]);
 	///*
 	vec3 gravityHold = GLM_VEC3_ZERO_INIT;
-	glm_vec3_add(player->velocity, player->velUp, gravityHold);
+	//glm_vec3_add(player->velocity, player->velUp, gravityHold);
+	glm_vec3_copy(player->velocity, gravityHold);	//misleading name, no gravity here only vel.
 
 	player->coords[0] += dt * gravityHold[0];
 	player->coords[1] += dt * gravityHold[1];
@@ -113,16 +119,18 @@ void ComputePositionPlayer(Player *player, double dt) {
 		player->coords[2] = 0.0f;
 	}
 
+	/*
 	if (player->velUp[1] < 0.0f && fabs(player->velUp[1]) >= fabs(GRAVITY * 40)) {
 		player->velUp[1] = GRAVITY * 40;
 	} else {
 		player->velUp[1] += dt * GRAVITY;
 	}
+	*/
 
 	glm_vec3_copy(player->coords, player->camera.cameraPos);
 	updateOBBPos(&player->box, player->coords);
 	//*/
-	glm_vec3_copy(player->coords, player->camera.cameraPos);
+	//glm_vec3_copy(player->coords, player->camera.cameraPos);
 	
 	//glm_vec3_copy(GLM_VEC3_ZERO, player->velAdded);
 	//glm_vec3_copy(GLM_VEC3_ZERO, player->velMoveNormal);
@@ -347,7 +355,11 @@ bool ComputeResolveCollisions(Player *player, Object *obj, float dt) {
 			//projectionOrthogonal[1] /= 8.0f;	//think about it...
 			projectionOrthogonal[2] = 0.0f;
 			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
-			glm_vec3_add(projectionOrthogonal, player->velUp, player->velUp);
+			if (player->velUp[1] < 0.0f) {
+				player->velUp[1] = GRAVITY;
+			} else {
+				glm_vec3_add(projectionOrthogonal, player->velUp, player->velUp);
+			}
 			//glm_vec3_add(projectionOrthogonal, player->velUp, player->velUpNormal);
 			//player->velUp[1] = 0.0f;
 			if (!player->jumping) {

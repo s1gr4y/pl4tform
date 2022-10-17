@@ -53,7 +53,7 @@ int Window_init(int wid, int high, char* title) {
 	//mat4[0][3] == 0, mat4[3][0] == 4
 
 	glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSwapInterval(0);	//1 for vsync, 0 not
+	glfwSwapInterval(1);	//1 for vsync, 0 not
 	int temp_high, temp_wid = 0;
 	get_resolution(&temp_wid, &temp_high);
 	glfwSetWindowPos(window.handle, (temp_wid-window.wid)/2, (temp_high-window.high)/2); //set the window position to mid
@@ -209,7 +209,7 @@ void action_callback() {
 	if (window.keyboard.keys[GLFW_KEY_SPACE] && player.in_air == false && player.jumping == false) {	// && player.in_air == true?	//so we don't inf jump but lol y not.
 		vec3 temp;
 		glm_vec3_zero(temp);
-		temp[1] = CAM_SPEED * 5;	//3.5
+		temp[1] = CAM_SPEED * 6;	//3.5
 		//glm_vec3_add(player.velocity, temp, player.velocity);
 		glm_vec3_copy(temp, player.velUp);
 		//player.in_air = true;
@@ -335,7 +335,7 @@ void window_loop() {
 		//	updateObjPos(&world.objList[i], window.dt, window.tick_float);
 		//}
 		
-		//UpdatePlayerPos(&player, window.dt * TICK_RATE);
+		UpdatePlayerPos(&player, window.dt * TICK_RATE);	//this only preapplies gravity
 		
 		bool isColliding = false;
 		for (int i = 0; i < world.objCount; i++) {
