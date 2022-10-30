@@ -23,7 +23,7 @@ struct Button {
 };
 
 struct Keyboard {
-	//arr of all possible key presses since GLFW_KEY_LAST is largest num
+	//arr (map mimic) of all possible key presses since GLFW_KEY_LAST is largest num
 	int keys[GLFW_KEY_LAST];
 };
 
@@ -40,7 +40,7 @@ struct Window {
 
     double curr_time;
     double prev_time;
-    double dt;									//delta time
+    double dt;							//delta time
     double time_passed;					//how long program has been running
     struct Keyboard keyboard;
 };

@@ -7,13 +7,13 @@ A simple 3D platforming game made in C and OpenGL. It is expected that the gamep
 ![thumbnail](README_imgs/game_beta_movingObjs.png)
 
 ### Current Features
-- Basic movement in the ground/air
+- Movement in the ground/air and on moving objects
 - Uses SAT algorithm and OBBs for collision detection
 - Movement physics response such as resistance and changed velocity on slopes
 
 ### To Be Implemented
 A TODO list, listed in order of importance and/or utility, top to bottom.
-1. Resolve player velocity in the advent of moving objects (including rotation) -partially resolved, needs fixing
+1. Resolve player velocity in the advent of moving objects (including rotation) -mostly resolved
 2. Coarse Grid for smart pre-check collision detection rather than check all objects
 3. Code Refactor with comments for clarity/efficiency (somewhat complete).
 
@@ -35,10 +35,13 @@ A reach/extra additions list, listed in no particular order.
 - ESC: Quit
 
 # How to build
+### This currently only builds on Windows 10/11. Inclusion of Linux && MacOS builds is in the works.
+If you are on a Linux/MacOS, you need to build GLFW and have the libraries in the same folder of the binary/executable (bin folder).
+## Windows 10/11 
 It can be built with cmake. You can install CMake here: [Link](https://cmake.org/install/)\
 The minimum CMake version is 3.0 but lower versions could work if you change the requirements in CMakeLists.txt.\
 Windows specific notes:\
-If you want to use mingw compiler rather than .NET/Microsoft compiler, do the following:\
+If you want to use mingw compiler rather than .NET/Microsoft (or default) compiler, do the following:\
 ```cmake -G "MinGW Makefiles" .```\
 ```make```\
 General steps:\

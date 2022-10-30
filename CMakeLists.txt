@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-#set(CMAKE_C_COMPILER "C:/MinGW/bin")	#unneeded, user's should have compiler in path.
+#set(CMAKE_C_COMPILER "C:/MinGW/bin")	#unneeded, user should have compiler in path.
 
 project(pl4tform VERSION 1.0
                 DESCRIPTION "pl4tform"
@@ -21,7 +21,8 @@ include_directories("${PROJECT_SOURCE_DIR}/Dependencies/glad/include")
 include_directories("${PROJECT_SOURCE_DIR}/Dependencies/cglm")
 include_directories("${PROJECT_SOURCE_DIR}/src/include")
 
-file(GLOB SOURCES	"src/engine/*.c"
+file(GLOB SOURCES
+					"src/engine/*.c"
 					"src/entity/*.c"
 					"src/gfx/*.c"
 					"src/utils/*.c"
