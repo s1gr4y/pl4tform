@@ -148,13 +148,13 @@ void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_
 	//unsigned int texture;
 	glGenTextures(1, &mesh->txture[txtIndex]);
     glBindTexture(GL_TEXTURE_2D, mesh->txture[txtIndex]); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-    // set the texture wrapping parameters
+    //set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
+    //set texture filtering parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	//GL_LINEAR_MIPMAP_LINEAR
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
+    //load image, create texture and generate mipmaps
     int width, height, nrChannels;
 
     unsigned int len = strlen(file_name);
@@ -168,16 +168,16 @@ void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_
     		continue;
     	}
     	if (sw == true) {
-    		printf("h3h3\n");
-    		printf("%c\n", file_name[i]);
+    		//printf("h3h3\n");
+    		//printf("%c\n", file_name[i]);
     		name[index] = file_name[i];
     		index++;
     	}
     }
-    printf("%c\n", name[0]);
-    printf("%s - end?\n", name);
+    //printf("%c\n", name[0]);
+    //printf("%s - end?\n", name);
     if (strcmp(name, "png") == 0) { //if image is png, alpha, else not
-    	printf("here1?\n");
+    	//printf("here1?\n");
     	unsigned char *data = stbi_load(file_name, &width, &height, &nrChannels, 0);
     	if (data) {
     		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -187,7 +187,7 @@ void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_
     	}
     	stbi_image_free(data);
     } else {
-    	printf("here2?\n");
+    	//printf("here2?\n");
     	unsigned char *data = stbi_load(file_name, &width, &height, &nrChannels, 0);
     	if (data) {
     		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -199,7 +199,7 @@ void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_
     }
     free(name);
 
-    printf("almost\n");
+    //printf("almost\n");
     //glActiveTexture(GL_TEXTURE0 + txtIndex);
 
     /*	//loads this into our shader, unnecessary for now.
@@ -212,7 +212,7 @@ void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_
     //glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void drawObject(struct Object obj, unsigned int pID) {
+void drawObject(struct Object obj, unsigned int pID) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
 	// draw model
 	Mesh mesh = meshList[obj.type];
 	mat4 model;

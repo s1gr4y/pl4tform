@@ -53,15 +53,26 @@ int Window_init(int wid, int high, char* title) {
 	//mat4[0][3] == 0, mat4[3][0] == 4
 
 	glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSwapInterval(1);	//1 for vsync, 0 not
+	glfwSwapInterval(0);	//1 for vsync, 0 not
 	int temp_high, temp_wid = 0;
 	get_resolution(&temp_wid, &temp_high);
 	glfwSetWindowPos(window.handle, (temp_wid-window.wid)/2, (temp_high-window.high)/2); //set the window position to mid
 
 	initRender();
 	initWorld();
-	loadShaders(vertexShaderSource, fragmentShaderSource);
-	glUseProgram(programID);
+	//loadShaders(vertexShaderSource, fragmentShaderSource);
+	loadShaders(vertexShaderSource, fragmentShaderSource, &programIDMain);			//main shader + program
+	loadShaders(vertexShaderSrcTXT, fragmentShaderSrcTXT, &programIDTxt);			//secondary shader + program
+	glUseProgram(programIDMain);
+	//glUseProgram(programIDTxt);
+	
+	//for text to render
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	loadFont();
+	generateVAO_VBO_text();
+	
+	
 	window_loop();
 	return 1;
 }	//1 == opened window, 0 == failed
@@ -218,7 +229,7 @@ void action_callback() {
 		tmp2[1] = 0.0f;
 		glm_vec3_copy(tmp2, player.velMove);
 		player.jumping = true;
-		printf("JUMPING: %f, %f, %f\n", player.velUp[0], player.velUp[1], player.velUp[2]);
+		//printf("JUMPING: %f, %f, %f\n", player.velUp[0], player.velUp[1], player.velUp[2]);
 	}
 	if (player.in_air == false) {
 		ApplyGroundResistance(player.velMove, window.dt * TICK_RATE);
@@ -284,14 +295,19 @@ void window_loop() {
 	//glBindVertexArray(VAO);	//which VAO we get data from.
 
 	window.tick = 0;
+	window.tick_float = 0.0f;
 	window.curr_time = glfwGetTime();
 	window.prev_time = glfwGetTime();
 	window.dt = 0.0;							//delta time
 	window.time_passed = 0.0;					//how long program has been running
+	
 
 	mat4 projection;
 	glm_mat4_identity(projection);
 	glm_perspective(glm_rad(90.0f), (float)window.wid / (float)window.high, 0.1f, 100.0f, projection);
+	
+	int fps_tick_counter = 0;
+	int frame_counter = 0;
 	
 	while(!glfwWindowShouldClose(window.handle)) {
 		glfwPollEvents();
@@ -301,9 +317,15 @@ void window_loop() {
 		window.curr_time = glfwGetTime();
 		//printf("current time: %f\n",window.curr_time);
 		//printf("previous time: %f\n",window.prev_time);
+		double prevTimeTmp = window.tick_float;
 		window.dt = window.curr_time - window.prev_time;
+		
+
+		double prevTimePassed = window.time_passed;
+		
+		//prev time reset
 		window.prev_time = window.curr_time;
-		printf("delta time: %f\n",window.dt);
+		//printf("delta time: %f\n", window.dt);
 
 		window.tick_float += window.dt * TICK_RATE;
 		window.tick = (int)window.tick_float;
@@ -311,13 +333,17 @@ void window_loop() {
 
 	    //printf("time: %f\n", window.time_passed);
 	    if (window.tick >= 999999) { //3330
-	    	window.handle = NULL;
 	    	glfwDestroyWindow(window.handle);
+			window.handle = NULL;
 	    	break;
 	    }
 
 	    glClearColor(0.36f, 0.66f, 0.86f, 1.0f);
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//draw all after this
+		
+		glUseProgram(programIDMain);
+		
 
 	    //glUseProgram(programID);
 	    //ComputePositionPlayer(&player, window.dt * TICK_RATE);
@@ -351,7 +377,7 @@ void window_loop() {
 		if (!isColliding) {
 			player.in_air = true;
 			player.is_grounded = false;
-			printf("not colliding......................\n");
+			//printf("not colliding......................\n");
 		} else {
 		
 			//Update obj vel
@@ -379,19 +405,79 @@ void window_loop() {
 			updateObjVel(&world.objList[i], window.dt, window.tick_float);
 			updateObjPos(&world.objList[i], window.dt, window.tick_float);
 		}
-
-		unsigned int viewLoc  = glGetUniformLocation(programID, "view");
-		unsigned int projLoc  = glGetUniformLocation(programID, "projection");
+		
+		glEnable(GL_DEPTH_TEST);
+		unsigned int viewLoc  = glGetUniformLocation(programIDMain, "view");
+		unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
 		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
 
 		for (unsigned int i = 0; i < world.objCount; i++) {
 			//printf("%f, %f, %f\n", world.objList[i].coordinates[0], world.objList[i].coordinates[1], world.objList[i].coordinates[2]);
-		    drawObject(world.objList[i], programID);
+		    drawObject(world.objList[i], programIDMain);
+		}
+		glDisable(GL_DEPTH_TEST);
+		
+		//draw text
+		/* //we can change projection here or pass in win parameters to function
+		//glUseProgram(programIDTxt);	//cause of all my problems..., must call useprog b4 glEnabling and glUniformMatrixXfv, etc.
+		mat4 projectionFLAT;
+		glm_mat4_identity(projectionFLAT);
+		glm_ortho(0.0f, (float)window.wid, 0.0f, (float)window.high, 0.0f, 100.0f, projectionFLAT);
+		unsigned int projLoc2  = glGetUniformLocation(programIDTxt, "projection");
+		glUniformMatrix4fv(projLoc2, 1, GL_FALSE, (float*)projectionFLAT);
+		*/
+		
+		window.fps = (1.0f/window.dt);
+		//printf("fps num is %d\n", window.fps);
+		const char tmpStr[] = "FPS: ";
+		///*
+		//printf("win: %f || prev: %f\n", window.time_passed, prevTimePassed);
+		if ((int)window.time_passed != (int)prevTimePassed)	{	//if (window.tick != (int) prevTimeTmp) {	//inaccurate, should count all frames every 11 ticks
+			//window.dtList[fps_tick_counter] = window.fps;
+			fps_tick_counter++;
+		}
+		if (fps_tick_counter >= 1) {	//1/6 second has passed
+			//int sum = 0;
+			//for (int i = 0; i < 10; i++) {
+			//	sum += window.dtList[i];
+			//}
+			window.current_display_fps = frame_counter; //sum/10; //window.fps;
+			fps_tick_counter = 0;
+			frame_counter = 0;
 		}
 		
-		printf("coords: %f, %f, %f\n", player.coords[0], player.coords[1], player.coords[2]);
+		//int fps = (1.0f/window.dt);
+		int rTmp = window.current_display_fps;
+		int tmpI = 0;
+		while (rTmp > 0) {
+			rTmp = rTmp/10;
+			tmpI++;
+		}
+		rTmp = window.current_display_fps;
+		int length = strlen(tmpStr) + tmpI;
+		char* FPS_counter = (char*) malloc(sizeof(char) * (length));
+		strcpy(FPS_counter, tmpStr);
+		//FPS_counter[0] = 'F';	FPS_counter[1] = 'P';	FPS_counter[2] = 'S';
+		//FPS_counter[3] = ':';	FPS_counter[4] = ' ';
+		for (int i = length - 1; i >= strlen(tmpStr); i--) {
+			//printf("cond num is %ld\n", strlen(tmpStr) + tmpI);
+			FPS_counter[i] = '0' + rTmp % 10;	//ascii 0 offset added.
+			//printf("at i of %d, it is %c\n", i, FPS_counter[i]);
+			rTmp /= 10;
+		}
+		FPS_counter[length] = 0;	//null terminator
+		//printf("%s\n", FPS_counter);
+		//printf("length of it is %ld\n", strlen(FPS_counter));
+		RenderText(programIDTxt, FPS_counter, strlen(tmpStr) + tmpI, window.wid - 285.0f, window.high - 80.0f, 1.0f, (vec3){1.0f, 1.0f, 1.0f}, window.wid, window.high);
+		
+		free(FPS_counter);
+		frame_counter++;
+		
+		//*/
+		
+		//printf("coords: %f, %f, %f\n", player.coords[0], player.coords[1], player.coords[2]);
 		//printf("theta: %f, phi %f\n", player.camera.theta, player.camera.phi);
 		glfwSwapBuffers(window.handle);
 	}

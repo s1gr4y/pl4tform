@@ -11,9 +11,17 @@
 extern const char *vertexShaderSource;
 extern const char *fragmentShaderSource;
 
-unsigned int vs, fs;		//vertex, fragment shader
-unsigned int programID;		//compiled/linked programid
+extern const char *vertexShaderSrcTXT;
+extern const char *fragmentShaderSrcTXT;
 
-void loadShaders(const char* vsSource, const char* fsSource);
+extern unsigned int vs1, fs1;				//vertex, fragment shader
+extern unsigned int programIDMain;			//compiled/linked programid
+
+extern unsigned int vs2d, fs2d;				//unneeded, only both programIDs
+extern unsigned int programIDTxt;
+
+//void loadShaders(const char* vsSource, const char* fsSource);
+void loadShaders(const char* vsSource, const char* fsSource, unsigned int* programID);
+void deleteUnbindShaders(unsigned int* vs, unsigned int* fs, unsigned int* programID); 
 
 #endif	//end shader.h

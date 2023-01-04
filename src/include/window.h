@@ -17,6 +17,7 @@
 #include "../include/mesh.h"
 #include "../include/game.h"
 #include "../include/camera.h"
+#include "../include/font.h"
 
 struct Button {
 	int pressed;
@@ -38,6 +39,9 @@ struct Window {
     float lastX;
     float lastY;
 
+	int current_display_fps;
+	int fps;
+	
     double curr_time;
     double prev_time;
     double dt;							//delta time

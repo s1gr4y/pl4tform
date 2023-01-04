@@ -61,6 +61,7 @@ typedef struct Object {	//needs orientation (vec3 rotation and axis)
 void initRender();
 void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *indices, unsigned int indexSize);
 void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_name);
+void generateVAO_VBO_text();
 void drawObject(struct Object obj, unsigned int pID);
 
 extern Mesh meshList[2];

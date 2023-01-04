@@ -19,6 +19,7 @@ include_directories("${PROJECT_SOURCE_DIR}/Dependencies")
 include_directories("${PROJECT_SOURCE_DIR}/Dependencies/GLFW/include/GLFW")
 include_directories("${PROJECT_SOURCE_DIR}/Dependencies/glad/include")
 include_directories("${PROJECT_SOURCE_DIR}/Dependencies/cglm")
+include_directories("${PROJECT_SOURCE_DIR}/Dependencies/freetype")
 include_directories("${PROJECT_SOURCE_DIR}/src/include")
 
 file(GLOB SOURCES
@@ -31,11 +32,13 @@ file(GLOB SOURCES
 add_executable(pl4tform ${SOURCES})
 
 #Link the libraries
-target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3dll.a)	#one of these might not be needed
+target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3dll.a)	#one of the glfw3 might not be needed
 target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3.a)
+target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/freetype.a)
 
-#Copy the dll and Resources to the output folder
+#Copy the dll and Resources folder to the output folder
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/glfw3.dll ${CMAKE_BINARY_DIR} COPYONLY)
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_SOURCE_DIR}/Resources/Textures ${CMAKE_BINARY_DIR}/Resources/Textures)
+                       ${CMAKE_SOURCE_DIR}/Resources ${CMAKE_BINARY_DIR}/Resources)
+					   
