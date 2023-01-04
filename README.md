@@ -4,7 +4,7 @@ A simple 3D platforming game made in C and OpenGL. It is expected that the gamep
 
 ### Preview
 
-![thumbnail](README_imgs/game_beta_movingObjs.png)
+![thumbnail](README_imgs/prev_with_text.png)
 
 ### Current Features
 - Movement in the ground/air and on moving objects
