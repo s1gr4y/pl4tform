@@ -35,26 +35,28 @@ if (UNIX)
 	if (MATH_LIBRARY)
 		target_link_libraries(pl4tform ${MATH_LIBRARY})
 	endif (MATH_LIBRARY)
-	target_link_libraries(pl4tform OpenGL:GL ${CMAKE_DL_LIBS})
+    find_package(OpenGL REQUIRED)
+	target_link_libraries(pl4tform OpenGL::GL ${CMAKE_DL_LIBS})
 endif (UNIX)
 
 #Link the libraries
 if (WIN32)
-	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3dll.a)	#need to also link dll
-	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3.a)
-	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/freetype.a)
+	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/WIN_libglfw3dll.a)	#need to also link dll
+	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/WIN_libglfw3.a)
+	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/WIN_freetype.a)
 endif (WIN32)
 
 if (UNIX)
-	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3dll.so.3.3)	#need to also link so
+	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw.so.3.3)	#need to also link so
 	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3.a)
 	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/libfreetype.so)
 endif (UNIX)
 
 #Copy the dlls/shared libraries and Resources folder to the output folder
 if (UNIX)
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3dll.so.3.3 ${CMAKE_BINARY_DIR} COPYONLY)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw.so.3.3 ${CMAKE_BINARY_DIR} COPYONLY)
 endif (UNIX)
+
 if (WIN32)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/glfw3.dll ${CMAKE_BINARY_DIR} COPYONLY)
 endif (WIN32)

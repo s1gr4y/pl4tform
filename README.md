@@ -93,6 +93,7 @@ We use GLFW3 version 3.3.8 but lower/other versions could work.
 
 For getting the dependencies, you need to get GLFW and FreeType libs by building them from their binaries.\
 On linux:\
+cmake -G "MinGW Makefiles" .\
 After building,\
 GFLW: need libglfw3dll.so.3.3 and libglfw3.a placed in the pl4tform/Dependencies/GLFW/lib-vc2022 folder.\
 FreeType: need libfreetype.so placed in the pl4tform/Dependencies folder.
