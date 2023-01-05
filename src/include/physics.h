@@ -10,7 +10,6 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
-#include <math.h>
 
 extern const double GRAVITY;
 extern const double AIR_RESISTANCE;

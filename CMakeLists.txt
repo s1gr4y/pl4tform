@@ -30,14 +30,35 @@ file(GLOB SOURCES
 					"src/*.c")
 
 add_executable(pl4tform ${SOURCES})
+if (UNIX)
+	find_library(MATH_LIBRARY m)
+	if (MATH_LIBRARY)
+		target_link_libraries(pl4tform ${MATH_LIBRARY})
+	endif (MATH_LIBRARY)
+	target_link_libraries(pl4tform OpenGL:GL ${CMAKE_DL_LIBS})
+endif (UNIX)
 
 #Link the libraries
-target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3dll.a)	#one of the glfw3 might not be needed
-target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3.a)
-target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/freetype.a)
+if (WIN32)
+	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3dll.a)	#need to also link dll
+	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3.a)
+	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/freetype.a)
+endif (WIN32)
 
-#Copy the dll and Resources folder to the output folder
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/glfw3.dll ${CMAKE_BINARY_DIR} COPYONLY)
+if (UNIX)
+	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3dll.so.3.3)	#need to also link so
+	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3.a)
+	target_link_libraries(pl4tform ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/libfreetype.so)
+endif (UNIX)
+
+#Copy the dlls/shared libraries and Resources folder to the output folder
+if (UNIX)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/libglfw3dll.so.3.3 ${CMAKE_BINARY_DIR} COPYONLY)
+endif (UNIX)
+if (WIN32)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/GLFW/lib-vc2022/glfw3.dll ${CMAKE_BINARY_DIR} COPYONLY)
+endif (WIN32)
+
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                        ${CMAKE_SOURCE_DIR}/Resources ${CMAKE_BINARY_DIR}/Resources)

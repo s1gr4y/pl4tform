@@ -16,13 +16,11 @@ typedef struct Character {
     unsigned int advance; 		//offset to advance to next char
 } Character;
 
-unsigned VAOtxt, VBOtxt;
-
 void generateVAO_VBO_text();
 int loadFont();
 void RenderText(unsigned int prgID, char* text, unsigned int textLength, float x, float y, float scale, vec3 color, float WinWidth, float Winheight);
 
-
+extern unsigned int VAOtxt, VBOtxt;
 extern Character charList[128];	//all ascii characters
 
 #endif

@@ -88,9 +88,14 @@ And there you go! The output is built in the pl4tform/bin directory, including t
 # Other Notes
 
 For the freetype library, we only need the lib ".a" file when linking with the exe, no dll need.\
-We use freetype version 2.12. We use OpenGL version 3.3 but higher versions could work.
+We use freetype version 2.12. We use OpenGL version 3.3 but higher versions could work.\
+We use GLFW3 version 3.3.8 but lower/other versions could work.
 
-For getting the dependencies, you need to get GLFW and FreeType libs by building them from their binaries.
+For getting the dependencies, you need to get GLFW and FreeType libs by building them from their binaries.\
+On linux:\
+After building,\
+GFLW: need libglfw3dll.so.3.3 and libglfw3.a placed in the pl4tform/Dependencies/GLFW/lib-vc2022 folder.\
+FreeType: need libfreetype.so placed in the pl4tform/Dependencies folder.
 
 Currently there's a velocity inheritance bug, I did not appropriately configure the correct rules or cases accordingly.\
 It is resolveable but busy with other aspects, you gain extreme speeds if hugging an moving object in the air.

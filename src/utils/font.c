@@ -1,5 +1,6 @@
 #include "../include/font.h"
 
+unsigned int VAOtxt, VBOtxt;
 Character charList[128];
 ///*
 void generateVAO_VBO_text() {
@@ -39,8 +40,7 @@ int loadFont() {
 	
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //disable byte-alignment restriction, prevent segfaults
   
-	for (unsigned char c = 0; c < 128; c++)
-	{
+	for (unsigned char c = 0; c < 128; c++) {
 		//load character glyph 
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
 			printf("Failed to load glyph\n");
@@ -72,21 +72,21 @@ int loadFont() {
 
 
 void RenderText(unsigned int prgID, char* text, unsigned int textLength, float x, float y, float scale, vec3 color, float WinWidth, float Winheight) {
-    glUseProgram(prgID);
+	glUseProgram(prgID);
 	mat4 projectionFLAT;
 	glm_mat4_identity(projectionFLAT);
 	glm_ortho(0.0f, WinWidth, 0.0f, Winheight, 0.0f, 100.0f, projectionFLAT);
 	unsigned int projLoc2  = glGetUniformLocation(programIDTxt, "projection");
 	glUniformMatrix4fv(projLoc2, 1, GL_FALSE, (float*)projectionFLAT);
-	
+
 	//enable
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
-    glUniform3f(glGetUniformLocation(prgID, "textColor"), color[0], color[1], color[2]);
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(VAOtxt);
+
+	glUniform3f(glGetUniformLocation(prgID, "textColor"), color[0], color[1], color[2]);
+	glActiveTexture(GL_TEXTURE0);
+	glBindVertexArray(VAOtxt);
 
     // iterate through all characters
     for (int i = 0; i < textLength; i++) {
@@ -108,17 +108,17 @@ void RenderText(unsigned int prgID, char* text, unsigned int textLength, float x
             { xpos + w, ypos,       1.0f, 1.0f },
             { xpos + w, ypos + h,   1.0f, 0.0f }
         };
-        //glyph texture over quad
-        glBindTexture(GL_TEXTURE_2D, ch.textureID);
+		//glyph texture over quad
+		glBindTexture(GL_TEXTURE_2D, ch.textureID);
 		glUniform1i(glGetUniformLocation(prgID, "text"), 0);
-        //change content of VBO memory
-        glBindBuffer(GL_ARRAY_BUFFER, VBOtxt);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-		
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        //advance cursor for next char (adv is in terms of 1/64 pixels), so bitshift by 6 to get value in pixels (2^6 = 64)
-        x += (ch.advance >> 6) * scale;
+		//change content of VBO memory
+		glBindBuffer(GL_ARRAY_BUFFER, VBOtxt);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		//advance cursor for next char (adv is in terms of 1/64 pixels), so bitshift by 6 to get value in pixels (2^6 = 64)
+		x += (ch.advance >> 6) * scale;
     }
 	//printf("\n");
     //glBindVertexArray(0);
