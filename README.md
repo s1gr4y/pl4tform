@@ -37,8 +37,10 @@ A reach/extra additions list, listed in no particular order.
 
 # How to build
 ### This currently only builds on Windows 10/11 and Linux. MacOS builds are on hold due to other interests.
-If you are on a MacOS/unsupported system, you need to build [GLFW](https://www.glfw.org/docs/latest/compile.html) and have the libraries in the same folder of the binary/executable (bin folder).\
-Additionally, if needed, you need to build the [FreeType](https://freetype.org/) libraries and place them in the Dependencies folder. Possibly need to build and link everything from scratch.
+If you are on a MacOS/unsupported system, you need to build [GLFW](https://www.glfw.org/docs/latest/compile.html) and have the libraries in pl4tform/Dependencies/GLFW/lib-vc2022.
+Additionally, you need to build the [FreeType](https://freetype.org/) libraries and place them in the Dependencies folder.
+
+The current cmake config for MacOS and other unsupported systems possibly won't work so, in that case, you would need to build and link everything from scratch.
 
 ## Windows 10/11 
 It can be built with cmake. You can install CMake here: [Link](https://cmake.org/install/)\
@@ -75,7 +77,7 @@ sudo apt-get install libglfw3-dev libepoxy-dev libjsoncpp-dev libgtk-3-dev libx1
 ```
 
 Now all that needs to be done is calling cmake in the platform/ directory\
-```cmake -G "MinGW Makefiles" .```\
+```cmake -G "Unix Makefiles" .```\
 ```make```
 
 And there you go! The output is built in the pl4tform/bin directory, including the source images, glfw dlls/so, and the program.
@@ -112,7 +114,6 @@ And there you go! The output is built in the pl4tform/bin directory, including t
 
 # Other Notes
 
-For the FreeType library, we only need the lib ".a" file when linking with the exe, no dll need.\
 We use FreeType version 2.12. We use OpenGL version 3.3 but higher versions could work.\
 We use GLFW3 version 3.3.8 but lower/other versions could work.
 
@@ -125,5 +126,5 @@ It is resolveable but busy with other aspects, you gain extreme speeds if huggin
 - [glad](https://github.com/Dav1dde/glad): OpenGL function pointer loader
 - [cglm](https://github.com/recp/cglm): Helper math library for vectors/quaternions
 - [stb_image](https://github.com/nothings/stb/blob/master/stb_image.h): Single header file for image texture generation
-- [FreeType](https://freetype.org/): Library to generate glyphs/data from ttf files for processing like textures
+- [FreeType](https://freetype.org/): Library to generate glyphs/data from ttf files for processing into textures
 
