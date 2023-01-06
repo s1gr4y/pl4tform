@@ -58,7 +58,7 @@ And there you go! The output is built in the pl4tform/bin directory, including t
 It can be built with cmake. You can install CMake here: [Link](https://cmake.org/install/)\
 The minimum CMake version is 3.0 but lower versions could work if you change the requirements in CMakeLists.txt.
 For getting the dependencies, I added my compiled libary binaries for GLFW and FreeType in the Dependencies folder.
-However, if you are on a different distribution and these libs do not work, you need to get GLFW and FreeType libs by building them from their binaries.
+However, if you are on a different distribution and these libs do not work, you need to get GLFW and FreeType libs by building them from their binaries.\
 Steps:\
 In your preferred terminal, in the platform/ directory
 1. Enter "cmake -G "Unix Makefiles" ."
