@@ -20,7 +20,7 @@ A TODO list, listed in order of importance and/or utility, top to bottom.
 
 ### Potential Features
 A reach/extra additions list, listed in no particular order.
-- Have Text/UI
+- Have Better Text/UI
 - Ability to rebind keys and have main/pause menu
 - Clear lose/win states
 - Include lighting
@@ -56,9 +56,9 @@ And there you go! The output is built in the pl4tform/bin directory, including t
 
 ## Linux (Ubuntu/Debian)
 It can be built with cmake. You can install CMake here: [Link](https://cmake.org/install/)\
-The minimum CMake version is 3.0 but lower versions could work if you change the requirements in CMakeLists.txt.\
-For getting the dependencies, I added my compiled libary binaries for GLFW and FreeType in the Dependencies folder.\
-However, if you are on a different distribution and these libs do not work, you need to get GLFW and FreeType libs by building them from their binaries.\
+The minimum CMake version is 3.0 but lower versions could work if you change the requirements in CMakeLists.txt.
+For getting the dependencies, I added my compiled libary binaries for GLFW and FreeType in the Dependencies folder.
+However, if you are on a different distribution and these libs do not work, you need to get GLFW and FreeType libs by building them from their binaries.
 Steps:\
 In your preferred terminal, in the platform/ directory
 1. Enter "cmake -G "Unix Makefiles" ."
@@ -74,9 +74,9 @@ If you can not run the game on Ubuntu/Debian-based distros, in the terminal run 
 sudo apt-get install libglfw3-dev libepoxy-dev libjsoncpp-dev libgtk-3-dev libx11-dev
 ```
 
-Now all that needs to be done is calling cmake in the platform/ directory
+Now all that needs to be done is calling cmake in the platform/ directory\
 ```cmake -G "MinGW Makefiles" .```\
-```make```\
+```make```
 
 And there you go! The output is built in the pl4tform/bin directory, including the source images, glfw dlls/so, and the program.
 
