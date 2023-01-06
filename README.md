@@ -36,9 +36,9 @@ A reach/extra additions list, listed in no particular order.
 - ESC: Quit
 
 # How to build
-### This currently only builds on Windows 10/11. Inclusion of Linux && MacOS builds are in the works.
-If you are on a Linux/MacOS, you need to build GLFW and have the libraries in the same folder of the binary/executable (bin folder).\
-Additionally, you need to build the [FreeType](https://freetype.org/) libraries and place them in the Dependencies folder.
+### This currently only builds on Windows 10/11 and Linux. MacOS builds are on hold due to other interests.
+If you are on a MacOS/unsupported system, you need to build [GLFW](https://www.glfw.org/docs/latest/compile.html) and have the libraries in the same folder of the binary/executable (bin folder).\
+Additionally, if needed, you need to build the [FreeType](https://freetype.org/) libraries and place them in the Dependencies folder. Possibly need to build and link everything from scratch.
 
 ## Windows 10/11 
 It can be built with cmake. You can install CMake here: [Link](https://cmake.org/install/)\
@@ -52,7 +52,33 @@ In your preferred terminal, in the platform/ directory
 1. Enter "cmake ."
 2. Enter "cmake --build ."
 
-And there you go! The output is built in the pl4tform/bin directory, including the source images, glfw dll, and the program.
+And there you go! The output is built in the pl4tform/bin directory, including the source images, glfw dlls/so, and the program.
+
+## Linux (Ubuntu/Debian)
+It can be built with cmake. You can install CMake here: [Link](https://cmake.org/install/)\
+The minimum CMake version is 3.0 but lower versions could work if you change the requirements in CMakeLists.txt.\
+For getting the dependencies, I added my compiled libary binaries for GLFW and FreeType in the Dependencies folder.\
+However, if you are on a different distribution and these libs do not work, you need to get GLFW and FreeType libs by building them from their binaries.\
+Steps:\
+In your preferred terminal, in the platform/ directory
+1. Enter "cmake -G "Unix Makefiles" ."
+2. Enter "make"
+
+If you need to create the libary yourself, visit the "Dependencies" section at the bottom of the README for links and follow the steps.
+For GLFW3 you should build with cmake and include shared libs to get the ".so.3.3" file ```cmake -S path/to/glfw -B path/to/build -D BUILD_SHARED_LIBS=ON```
+After getting the libraries, libglfw3dll.so.3.3 and libglfw3.a need to be placed in the pl4tform/Dependencies/GLFW/lib-vc2022 folder.
+For FreeType, libfreetype.so needs to be placed in the pl4tform/Dependencies folder.
+
+If you can not run the game on Ubuntu/Debian-based distros, in the terminal run the following to install dependencies.
+```
+sudo apt-get install libglfw3-dev libepoxy-dev libjsoncpp-dev libgtk-3-dev libx11-dev
+```
+
+Now all that needs to be done is calling cmake in the platform/ directory
+```cmake -G "MinGW Makefiles" .```\
+```make```\
+
+And there you go! The output is built in the pl4tform/bin directory, including the source images, glfw dlls/so, and the program.
 
 # File Directory
 ```bash
@@ -63,7 +89,6 @@ And there you go! The output is built in the pl4tform/bin directory, including t
 	|-freetype/
 	|-glad/
 	|-GLFW/
-	|-freetype.a	//lib to link
 	|-ft2build.h
 	|-stb_image.h
 |-README_imgs/
@@ -87,16 +112,9 @@ And there you go! The output is built in the pl4tform/bin directory, including t
 
 # Other Notes
 
-For the freetype library, we only need the lib ".a" file when linking with the exe, no dll need.\
-We use freetype version 2.12. We use OpenGL version 3.3 but higher versions could work.\
+For the FreeType library, we only need the lib ".a" file when linking with the exe, no dll need.\
+We use FreeType version 2.12. We use OpenGL version 3.3 but higher versions could work.\
 We use GLFW3 version 3.3.8 but lower/other versions could work.
-
-For getting the dependencies, you need to get GLFW and FreeType libs by building them from their binaries.\
-On linux:\
-cmake -G "MinGW Makefiles" .\
-After building,\
-GFLW: need libglfw3dll.so.3.3 and libglfw3.a placed in the pl4tform/Dependencies/GLFW/lib-vc2022 folder.\
-FreeType: need libfreetype.so placed in the pl4tform/Dependencies folder.
 
 Currently there's a velocity inheritance bug, I did not appropriately configure the correct rules or cases accordingly.\
 It is resolveable but busy with other aspects, you gain extreme speeds if hugging an moving object in the air.
