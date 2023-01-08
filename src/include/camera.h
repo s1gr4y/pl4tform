@@ -2,7 +2,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-const double CAM_SPEED;
+extern const double CAM_SPEED;
 
 typedef struct Camera {
 	vec3 cameraPos;

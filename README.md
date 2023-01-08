@@ -66,21 +66,26 @@ In your preferred terminal, in the platform/ directory
 1. Enter "cmake -G "Unix Makefiles" ."
 2. Enter "make"
 
+If step 1 fails, install the following dependencies with the command then retry step 1:
+```
+sudo apt-get install libglfw3-dev libepoxy-dev libjsoncpp-dev libgtk-3-dev libx11-dev
+```
+
 If you need to create the libary yourself, visit the "Dependencies" section at the bottom of the README for links and follow the steps.
 For GLFW3 you should build with cmake and include shared libs to get the ".so.3.3" file ```cmake -S path/to/glfw -B path/to/build -D BUILD_SHARED_LIBS=ON```
 After getting the libraries, libglfw3dll.so.3.3 and libglfw3.a need to be placed in the pl4tform/Dependencies/GLFW/lib-vc2022 folder.
 For FreeType, libfreetype.so needs to be placed in the pl4tform/Dependencies folder.
-
-If you can not run the game on Ubuntu/Debian-based distros, in the terminal run the following to install dependencies.
-```
-sudo apt-get install libglfw3-dev libepoxy-dev libjsoncpp-dev libgtk-3-dev libx11-dev
-```
 
 Now all that needs to be done is calling cmake in the platform/ directory\
 ```cmake -G "Unix Makefiles" .```\
 ```make```
 
 And there you go! The output is built in the pl4tform/bin directory, including the source images, glfw dlls/so, and the program.
+
+If you can not run the game on Ubuntu/Debian-based distros, in the terminal run the following to install dependencies.
+```
+sudo apt-get install libglfw3-dev libepoxy-dev libjsoncpp-dev libgtk-3-dev libx11-dev
+```
 
 # File Directory
 ```bash
