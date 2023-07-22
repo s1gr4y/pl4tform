@@ -2,25 +2,13 @@
 
 const double GRAVITY = -0.4f/66.0f;			//-0.3f/66.0f;
 const double AIR_RESISTANCE = -0.01f/66.0f;	//-0.1f/66.0f;
-const double GROUND_RESISTANCE = -0.2f/66.0f;	//-0.1f/66.0f;
+const double GROUND_RESISTANCE = -0.25f/66.0f;	//-0.1f/66.0f;
 
 void ComputePositionObj(Object obj) {
 	exit(-1);
 }
 
 void UpdatePlayerPos(Player *player, double dt) {	//simple position update, collision detection resolves when collision occurs so compute at loop start is fine.
-	//could move resistance here but will see if needed l8r
-	/*
-	if (player->in_air == false) {
-		ApplyGroundResistance(player->velUp, dt);
-		ApplyGroundResistance(player->velMoveNormal, dt);
-		ApplyGroundResistance(player->velocity, dt);
-	} else {
-		ApplyAirResistance(player->velUp, dt);
-		ApplyAirResistance(player->velMoveNormal, dt);
-		ApplyAirResistance(player->velocity, dt);
-	}
-	*/
 	if (player->velUp[1] < 0.0f && fabs(player->velUp[1]) >= fabs(GRAVITY * 40)) {
 		player->velUp[1] = GRAVITY * 40;
 	} else {

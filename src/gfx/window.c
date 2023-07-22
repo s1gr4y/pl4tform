@@ -63,6 +63,8 @@ int Window_init(int wid, int high, char* title) {
 	//loadShaders(vertexShaderSource, fragmentShaderSource);
 	loadShaders(vertexShaderSource, fragmentShaderSource, &programIDMain);			//main shader + program
 	loadShaders(vertexShaderSrcTXT, fragmentShaderSrcTXT, &programIDTxt);			//secondary shader + program
+	loadShaders(vertexLightShaderSrc, fragmentLightShaderSrc, &programIDLight);
+	
 	glUseProgram(programIDMain);
 	//glUseProgram(programIDTxt);
 	
@@ -386,7 +388,10 @@ void window_loop() {
 				updateObjVel(&world.objList[i], window.dt, window.tick_float);
 				//change player's velAdded
 				if (player.objCollisionList[i] == true) {
-					glm_vec3_add(player.velAdded, world.objList[i].velocity, player.velAdded);
+					// should also check if adding would slow the player down, if it does add anyway
+					if ((glm_vec3_norm(world.objList[i].velocity) + (CAM_SPEED * 2.5)) >= glm_vec3_norm(player.velocity)) {// prevents flying but hard to stick on top of objs
+						glm_vec3_add(player.velAdded, world.objList[i].velocity, player.velAdded);
+					}
 				}
 				player.objCollisionList[i] = false;
 			}
@@ -402,6 +407,9 @@ void window_loop() {
 		
 		//Update obj vel
 		for (int i = 0; i < world.objCount; i++) {	//need to move obj later so vel doesn't missalign, but our model and obj aren't in sync
+			static float updDeg = 0.0f;
+			static vec3 tmp = (vec3) {3.0f, 0.0f, 0.0f};
+			static bool first = false;
 			updateObjVel(&world.objList[i], window.dt, window.tick_float);
 			updateObjPos(&world.objList[i], window.dt, window.tick_float);
 		}
@@ -410,12 +418,33 @@ void window_loop() {
 		unsigned int viewLoc  = glGetUniformLocation(programIDMain, "view");
 		unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
-		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
+		//currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 
 		for (unsigned int i = 0; i < world.objCount; i++) {
 			//printf("%f, %f, %f\n", world.objList[i].coordinates[0], world.objList[i].coordinates[1], world.objList[i].coordinates[2]);
-		    drawObject(world.objList[i], programIDMain);
+			
+			if (world.objList[i].lightSrc == false) {
+				int count = 0;
+			    	Object *closest_src_list = findClosestLightSrc(world.objList[i], &count);	//self doesn't matter since we know not light source
+			    	glUseProgram(programIDMain);
+			    	glEnable(GL_DEPTH_TEST);
+			    	unsigned int viewLoc  = glGetUniformLocation(programIDMain, "view");
+				unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
+				glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
+				glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
+			    	drawObject(world.objList[i], programIDMain, closest_src_list, count, player.camera);
+			    	//printf("hy\n");
+			    	free(closest_src_list);
+		    	} else {
+		    		glUseProgram(programIDLight);
+		    		glEnable(GL_DEPTH_TEST);
+		    		unsigned int TviewLoc  = glGetUniformLocation(programIDLight, "view");
+				unsigned int TprojLoc  = glGetUniformLocation(programIDLight, "projection");
+				glUniformMatrix4fv(TviewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
+				glUniformMatrix4fv(TprojLoc, 1, GL_FALSE, (float*)projection);
+		    		drawObjectLight(world.objList[i], programIDLight);
+		    	}
 		}
 		glDisable(GL_DEPTH_TEST);
 		

@@ -3,10 +3,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../Dependencies/stb_image.h"
 
-Mesh meshList[2];	//only tri and cubes
+Mesh meshList[3];	//only tri and cubes
 
 void initRender() {
 	//glActiveTexture(GL_TEXTURE0 + 1); //say we have 16 txtures.
+	/*
 	float square_vertices[] = { //x,y,z | x,y
 		//front / back faces
 		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -60,6 +61,52 @@ void initRender() {
 		20, 21, 22,	//sq 6:
 		21, 22, 23
 	};
+	*/
+	
+	float vertices[] = {
+		// positions          // normals           // texture coords
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+    	};
 
 	float triangle_vertices[] = { //x,y,z | x,y
 		//front / back faces
@@ -91,8 +138,18 @@ void initRender() {
 	};
 
 	//0 == sq, 1 == triag
-	setupMesh(&(meshList[0]), square_vertices, sizeof(square_vertices), square_posIndices, sizeof(square_posIndices));
+	setupMesh(&(meshList[0]), vertices, sizeof(vertices), NULL, 0);
 	setupMesh(&(meshList[1]), triangle_vertices, sizeof(triangle_vertices), triangle_posIndices, sizeof(triangle_posIndices));
+	
+	//setupMesh(&(meshList[2]), vertices, sizeof(vertices), NULL, 0);
+	glGenVertexArrays(1, &(meshList[2].VAO));
+	glGenVertexArrays(1, &(meshList[2].VBO));
+	glBindVertexArray((meshList[2].VAO));
+
+	glBindBuffer(GL_ARRAY_BUFFER, meshList[2].VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 }
 
 void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *indices, unsigned int indexSize) {
@@ -114,21 +171,19 @@ void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *i
 
 	// 3. copy our index array in a element buffer for OpenGL to use
 	///*
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize, indices, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize, indices, GL_STATIC_DRAW);
 
 	//*/
 
 
 	// 4. then set the vertex attributes pointers
 	///*
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-
-	//glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
-	//glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 	//*/
 
@@ -212,10 +267,12 @@ void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_
     //glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void drawObject(struct Object obj, unsigned int pID) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
+void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int count, Camera camera) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
 	// draw model
 	Mesh mesh = meshList[obj.type];
 	mat4 model;
+	mat4 tmpMatNorm;
+	mat3 matrixNormal;
 	for (int i = 0; i < 3; i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, mesh.txture[i]);
@@ -225,17 +282,117 @@ void drawObject(struct Object obj, unsigned int pID) {	//debateable if needs to 
 	glm_translate(model, obj.coordinates);
 	glm_rotate(model, glm_rad(obj.rotation), obj.orientation_axis);
 	glm_scale(model, obj.scale_dim);
+	
+	glUniform3f(glGetUniformLocation(pID, "viewPos"), camera.cameraPos[0], camera.cameraPos[1], camera.cameraPos[2]);
+        glUniform1f(glGetUniformLocation(pID,"material.shininess"), 8.0f);
+        glUniform1i(glGetUniformLocation(pID,"LIGHT_CAP"), count);
+	
+	glUniform3f(glGetUniformLocation(pID, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
+        glUniform3f(glGetUniformLocation(pID, "dirLight.ambient"), 0.05f, 0.05f, 0.05f);
+        glUniform3f(glGetUniformLocation(pID, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
+        glUniform3f(glGetUniformLocation(pID, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
+        
+        
+        //char line[] = pointLights[0].position
+        //fix later lazy
+	for (int i = 0; i < count; i++) {
+		char buffer[64];
+		vec3 tmp = GLM_VEC3_ZERO_INIT;
+		glm_vec3_copy(lightObjs[0].coordinates, tmp);
+
+		sprintf(buffer, "pointLights[%i].position", i);
+		glUniform3f(glGetUniformLocation(pID, buffer), tmp[0], tmp[1], tmp[2]);
+
+		sprintf(buffer, "pointLights[%i].ambient", i);
+		glUniform3f(glGetUniformLocation(pID, buffer), 0.05f, 0.05f, 0.05f);
+		
+		sprintf(buffer, "pointLights[%i].diffuse", i);
+		glUniform3f(glGetUniformLocation(pID, buffer), 0.8f, 0.8f, 0.8f);
+		
+		sprintf(buffer, "pointLights[%i].specular", i);
+		glUniform3f(glGetUniformLocation(pID, buffer), 1.0f, 1.0f, 1.0f);
+		
+		sprintf(buffer, "pointLights[%i].constant", i);
+		glUniform1f(glGetUniformLocation(pID, buffer), 1.0f);
+
+		sprintf(buffer, "pointLights[%i].linear", i);
+		glUniform1f(glGetUniformLocation(pID, buffer), 0.09f);
+
+		sprintf(buffer, "pointLights[%i].qaudratic", i);
+		glUniform1f(glGetUniformLocation(pID, buffer), 0.032f);
+	}
+        
+        glUniform3f(glGetUniformLocation(pID, "spotLight.position"), camera.cameraPos[0], camera.cameraPos[1], camera.cameraPos[2]);
+        glUniform3f(glGetUniformLocation(pID, "spotLight.direction"), camera.cameraFront[0], camera.cameraFront[1], camera.cameraFront[2]);
+        glUniform3f(glGetUniformLocation(pID, "spotLight.ambient"), 0.0f, 0.0f, 0.0f);
+        glUniform3f(glGetUniformLocation(pID, "spotLight.diffuse"), 0.0f, 0.0f, 0.0f);
+        glUniform3f(glGetUniformLocation(pID, "spotLight.specular"), 0.0f, 0.0f, 0.0f);
+        glUniform1f(glGetUniformLocation(pID, "spotLight.constant"), 1.0f);
+        glUniform1f(glGetUniformLocation(pID, "spotLight.linear"), 0.09f);
+        glUniform1f(glGetUniformLocation(pID, "spotLight.quadratic"), 0.032f);
+        glUniform1f(glGetUniformLocation(pID, "spotLight.cutOff"), cosf(glm_rad(12.5f)));
+        glUniform1f(glGetUniformLocation(pID, "spotLight.outerCutOff"), cosf(glm_rad(15.0f)));  
+	
+	
 	if (obj.one_txture == true) {
-		glUniform1i(glGetUniformLocation(pID, "texture1"), 2);
-		glUniform1i(glGetUniformLocation(pID, "texture2"), 2);
+		glUniform1i(glGetUniformLocation(pID, "material.texture1"), 2);
+		glUniform1i(glGetUniformLocation(pID, "material.texture2"), 2);
 		glUniform1f(glGetUniformLocation(pID, "mixer"), 1.0f);
 	} else {
-		glUniform1i(glGetUniformLocation(pID, "texture1"), 1);
-		glUniform1i(glGetUniformLocation(pID, "texture2"), 1);
+		glUniform1i(glGetUniformLocation(pID, "material.texture1"), 1);
+		glUniform1i(glGetUniformLocation(pID, "material.texture2"), 1);
 		glUniform1f(glGetUniformLocation(pID, "mixer"), 0.5f);
 	}
+	
+	unsigned int matrixNormalLoc = glGetUniformLocation(pID, "matrixNormal");
+	
+	//glm_mat4_copy(model, tmpMatNorm);
+	glm_mat4_pick3(model, matrixNormal);
+	//glm_mat4_inv(model, tmpMatNorm);			//not sure if inverse and transpose are necessary but will keep copy
+	//glm_mat4_transpose_to(tmpMatNorm, tmpMatNorm);
+	/*
+	int j = -1;
+	for (int i = 0; i < 9; i++) {	// loop to convert column dominant mat4 to mat3
+		if (i % 3 == 0) {
+			j += 1;
+		}
+		matrixNormal[j][i%3] = tmpMatNorm[j][i%3];
+	}
+	*/
+	//glm_mat3_copy((float (*)[3])tmpMatNorm, matrixNormal);	// copy the first 3 rows and cols from 4x4 mat to get scalar part along diaganal and not transform
+	glUniformMatrix3fv(matrixNormalLoc, 1, GL_FALSE, (float*)matrixNormal);
+	
 	unsigned int modelLoc = glGetUniformLocation(pID, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)model);
-	glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	//glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
 	//glBindVertexArray(0);
 }
+
+void drawObjectLight(struct Object obj, unsigned int pID) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
+	Mesh mesh = meshList[obj.type];
+	mat4 model;
+	mat4 tmpMatNorm;
+	mat3 matrixNormal;
+	
+	glBindVertexArray(mesh.VAO);
+	glm_mat4_identity(model);
+	glm_translate(model, obj.coordinates);
+	glm_rotate(model, glm_rad(obj.rotation), obj.orientation_axis);
+	glm_scale(model, obj.scale_dim);
+	
+	//unsigned int matrixNormalLoc = glGetUniformLocation(pID, "matrixNormal");
+	
+	//glm_mat4_inv(model, tmpMatNorm);
+	//glm_mat4_transpose_to(tmpMatNorm, tmpMatNorm);
+	//glm_mat3_copy((float (*)[3])tmpMatNorm, matrixNormal);	// copy the first 3 rows and cols from 4x4 mat to get scalar part along diaganal and not transform
+	//glUniformMatrix3fv(matrixNormalLoc, 1, GL_FALSE, (float*)matrixNormal);
+	
+	
+	unsigned int modelLoc = glGetUniformLocation(pID, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)model);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	//glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
+	//glBindVertexArray(0);
+}
+

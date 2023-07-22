@@ -8,6 +8,7 @@
 
 #include "../include/shader.h"
 #include "../include/OBB.h"
+#include "../include/camera.h"
 
 
 #include <stdio.h>
@@ -17,7 +18,8 @@
 
 typedef enum {
 	meshType_cube = 0,
-	meshType_triangle = 1
+	meshType_triangle = 1,
+	meshType_cube_light = 2
 } meshType;
 
 typedef struct Mesh {
@@ -33,12 +35,6 @@ typedef struct Mesh {
 	//struct Texture *textures;
 } Mesh;
 
-struct Vertex {
-    vec3 Position;
-    vec3 Normal;
-    vec2 TexCoords;
-};
-
 struct Texture {
     unsigned int id;
     char* type;
@@ -48,6 +44,7 @@ typedef struct Object {	//needs orientation (vec3 rotation and axis)
 	unsigned int ID;
 	meshType type;
 	bool one_txture;
+	bool lightSrc;
 	vec3 futureVel;
 	vec3 velocity;
 	void (*velFunc)(float, float, float, vec3);
@@ -62,8 +59,9 @@ void initRender();
 void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *indices, unsigned int indexSize);
 void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_name);
 void generateVAO_VBO_text();
-void drawObject(struct Object obj, unsigned int pID);
+void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int count, Camera camera);
+void drawObjectLight(struct Object obj, unsigned int pID);
 
-extern Mesh meshList[2];
+extern Mesh meshList[3];
 
 #endif

@@ -35,35 +35,50 @@ void initWorld() {
 	initOBB(&player.box, player.coords, player.width, player.height, player.width, (vec3){0.0f, 1.0f, 0.0f}, 90.0f);
 
 	vec3 objPositions[] = {	//figure out game objects / collision / try triangle - done
-	    { 0.0f, 0.45f,  0.0f},
-	    { 0.0f, 1.0f, 0.0f},
-	    {5.0f, 1.0f, 5.0f},
-	    {-5.0f, 1.0f, 5.0f},
-		{5.0f, 1.0f, -5.0f},
+		{ 0.0f, 0.45f,  0.0f},
+		{ 0.0f, 1.0f, 0.0f},
+		{5.0f, 1.0f, 5.0f},
+		{-5.0f, 1.0f, 5.0f},
+		{5.0f, 1.0f, -5.0f}
 	};
 
-	addObj(meshType_cube, false, objPositions[0], (vec3){20.0f, 0.1f, 20.0f}, (vec3){1.0f, 0.0f, 0.0f}, 0.0f, 0);
+	addObj(meshType_cube, false, objPositions[0], (vec3){20.0f, 0.1f, 20.0f}, (vec3){1.0f, 0.0f, 0.0f}, 0.0f, 0, NULL);
+	world.objList[0].lightSrc = false;
 
 	for (int i = 1; i < 5; i++) {
 		//if (i % 2 == 0) {
 			//addObj(meshType_triangle, true, objPositions[i], (vec3){1.5f, 1.0f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, rand() % 91, i);
 		//} else {
 		if (i == 1) {
-			addObj(meshType_cube, true, objPositions[i], (vec3){1.0f, 1.0f, 1.0f}, (vec3){0.0f, 1.0f, 0.0f}, 45.0f, i);
+			addObj(meshType_cube, true, objPositions[i], (vec3){1.0f, 1.0f, 1.0f}, (vec3){0.0f, 1.0f, 0.0f}, 45.0f, i, NULL);
+			world.objList[i].lightSrc = false;
 		} else {
 			vec3 tmp = {0.0f, 0.1f, 0.0f};
 			glm_vec3_add(tmp, objPositions[i], objPositions[i]);
-			addObj(meshType_cube, true, objPositions[i], (vec3){3.0f, 1.0f, 3.0f}, (vec3){(rand() % 11)/10.0f, 0.0f, (rand() % 11)/10.0f}, (rand() % 50)/1.0f, i);
+			addObj(meshType_cube, true, objPositions[i], (vec3){3.0f, 1.0f, 3.0f}, (vec3){(rand() % 11)/10.0f, 0.0f, (rand() % 11)/10.0f}, (rand() % 50)/1.0f, i, &updateObjVelFuncXZCircle);
+			world.objList[i].lightSrc = false;
 		}
 		//}
 	}
 	//add last for debug testing
-	addObj(meshType_cube, true, (vec3){-5.5f, 0.8f, -3.5f}, (vec3){3.2f, 1.0f, 3.2f}, (vec3){1.0f, 0.0f, 0.0f}, 45.0f, 6);
+	addObj(meshType_cube, true, (vec3){-5.5f, 0.8f, -3.5f}, (vec3){3.2f, 1.0f, 3.2f}, (vec3){1.0f, 0.0f, 0.0f}, 45.0f, 5, &updateObjVelFuncXZCircle);
+	world.objList[5].lightSrc = false;
+	
+	//add light source.
+	addObj(meshType_cube_light, true, (vec3){0.0f, 4.0f, 0.0f}, (vec3){1.2f, 1.2f, 1.2f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 6, NULL);
+	world.objList[6].lightSrc = true;
+	
+	addObj(meshType_cube_light, true, (vec3){10.0f, -1.0f, 10.0f}, (vec3){3.0f, 1.0f, 3.0f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 7, &updateObjVelFuncVertical);
+	world.objList[7].lightSrc = true;
+	
+	//extra
+	addObj(meshType_cube, true, (vec3){12.0f, 1.0f, 1.0f}, (vec3){1.5f, 1.50f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 8, &updateObjVelFuncXZCircle);
+	world.objList[8].lightSrc = false;
 	
 	checkObjList(&player);
 }
 
-void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, float angle, unsigned int index) {
+void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, float angle, unsigned int index, void (*f)(float, float, float, vec3)) {
 	world.objCount++;
 	if (world.listMax <= world.objCount) {
 		world.listMax *= 2;
@@ -81,7 +96,7 @@ void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, fl
 	//OBB
 	initOBB(&ex.box, coords, scale[0]/2.0f, scale[1]/2.0f, scale[2]/2.0f, ex.orientation_axis, angle);
 	if (one_txt == true) {
-		ex.velFunc = &updateObjVelFuncLinearFlat; //&updateObjVelFuncLinearFlat;	//updateObjVelFuncXZCircle	//updateObjVelFuncLinearFlat;
+		ex.velFunc = f;	//&updateObjVelFuncXZCircle	//updateObjVelFuncLinearFlat; //&updateObjVelFuncLinearFlat; //updateObjVelFuncXZCircle //updateObjVelFuncLinearFlat;
 		//ex.velFunc = NULL;
 	} else {
 		ex.velFunc = NULL;
@@ -132,6 +147,10 @@ void updateObjVelFuncLinearFlat(float float_tick, float offset, float r, vec3 re
 	glm_vec3_copy((vec3){r * sinf(glm_rad(float_tick + offset)), 0.0f, r * sinf(glm_rad(float_tick + offset))}, ret);
 }
 
+void updateObjVelFuncVertical(float float_tick, float offset, float r, vec3 ret) {
+	glm_vec3_copy((vec3){0.0f, -r * sin(glm_rad(float_tick + offset)), 0.0f}, ret);
+}
+
 
 void checkObjList(Player *plyr) {
 	plyr->objCollisionList = (bool*) realloc(plyr->objCollisionList, sizeof(bool) * world.listMax);
@@ -148,5 +167,19 @@ void updateVelAdded(Player *plyr) {
 		}
 		plyr->objCollisionList[i] = false;
 	}
+}
+
+Object* findClosestLightSrc(Object obj, int* count) {	//should use coarse grid for simple searches, temp solution for now.
+	Object* closest_src_list = (Object*) malloc(sizeof(Object) * 5);
+	int index = 0;
+	for (int i = 0; i < world.objCount; i++) {
+		if (world.objList[i].lightSrc == true) {
+			closest_src_list[index] = world.objList[i];
+			index++;
+		}
+	}
+	//will add size checks/closest light later...
+	*count = index;
+	return closest_src_list;
 }
 

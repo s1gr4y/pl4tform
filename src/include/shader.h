@@ -14,11 +14,17 @@ extern const char *fragmentShaderSource;
 extern const char *vertexShaderSrcTXT;
 extern const char *fragmentShaderSrcTXT;
 
+extern const char *vertexLightShaderSrc;
+	
+extern const char *fragmentLightShaderSrc;
+
 extern unsigned int vs1, fs1;				//vertex, fragment shader
 extern unsigned int programIDMain;			//compiled/linked programid
 
 extern unsigned int vs2d, fs2d;				//unneeded, only both programIDs
 extern unsigned int programIDTxt;
+
+extern unsigned int programIDLight;
 
 //void loadShaders(const char* vsSource, const char* fsSource);
 void loadShaders(const char* vsSource, const char* fsSource, unsigned int* programID);
