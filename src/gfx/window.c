@@ -53,7 +53,7 @@ int Window_init(int wid, int high, char* title) {
 	//mat4[0][3] == 0, mat4[3][0] == 4
 
 	glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSwapInterval(0);	//1 for vsync, 0 not
+	glfwSwapInterval(1);	//1 for vsync, 0 not
 	int temp_high, temp_wid = 0;
 	get_resolution(&temp_wid, &temp_high);
 	glfwSetWindowPos(window.handle, (temp_wid-window.wid)/2, (temp_high-window.high)/2); //set the window position to mid
@@ -478,6 +478,7 @@ void window_loop() {
 		}
 		
 		//int fps = (1.0f/window.dt);
+		//printf("current fps: %d\n", window.current_display_fps);
 		int rTmp = window.current_display_fps;
 		int tmpI = 0;
 		while (rTmp > 0) {
@@ -486,7 +487,7 @@ void window_loop() {
 		}
 		rTmp = window.current_display_fps;
 		int length = strlen(tmpStr) + tmpI;
-		char* FPS_counter = (char*) malloc(sizeof(char) * (length));
+		char* FPS_counter = (char*) malloc(sizeof(char) * (length + 1));
 		strcpy(FPS_counter, tmpStr);
 		//FPS_counter[0] = 'F';	FPS_counter[1] = 'P';	FPS_counter[2] = 'S';
 		//FPS_counter[3] = ':';	FPS_counter[4] = ' ';
@@ -499,7 +500,7 @@ void window_loop() {
 		FPS_counter[length] = 0;	//null terminator
 		//printf("%s\n", FPS_counter);
 		//printf("length of it is %ld\n", strlen(FPS_counter));
-		RenderText(programIDTxt, FPS_counter, strlen(tmpStr) + tmpI, window.wid - 285.0f, window.high - 80.0f, 1.0f, (vec3){1.0f, 1.0f, 1.0f}, window.wid, window.high);
+		RenderText(programIDTxt, FPS_counter, strlen(tmpStr) + tmpI, window.wid - 315.0f, window.high - 80.0f, 1.0f, (vec3){1.0f, 1.0f, 1.0f}, window.wid, window.high);
 		
 		free(FPS_counter);
 		frame_counter++;
