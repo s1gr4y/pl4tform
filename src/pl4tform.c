@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "include/window.h"
+#include "include/obj_loader.h"
 
 int main(void) {
 

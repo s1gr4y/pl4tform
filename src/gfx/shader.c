@@ -6,7 +6,9 @@ unsigned int programIDMain;			//compiled/linked programid
 //unsigned int vs2d, fs2d;		//vs, fs for text.
 unsigned int programIDTxt;		//compiled/linked programid for text
 
-unsigned int programIDLight;		//compiled/linked programid for light
+unsigned int programIDLight;	//compiled/linked programid for light
+
+unsigned int programIDSimple;	//compiled/linked programid for basic shader
 
 const char *vertexShaderSource =
 	"#version 330 core\n"
@@ -25,7 +27,7 @@ const char *vertexShaderSource =
 	"void main()\n"
 	"{\n"
 	//"	vertexCol = vec4(aCol.r, aCol.g, aCol.b, aCol.a);\n"
-    	"	gl_Position = projection * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n" //vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+    "	gl_Position = projection * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n" //vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
 	"	TexCoord = aTexCoord;\n"				//mat3(transpose(inverse(model))) * aNormal;\n
 	"	Normal = matrixNormal * aNormal;\n"	//normals rotate as the obj does, inefficient on gpu, prefer to do this in cpu then pass the result into shader
 	"	FragPos = vec3(model * vec4(aPos, 1.0));\n"
@@ -33,18 +35,19 @@ const char *vertexShaderSource =
 
 const char *fragmentShaderSource =
 	"#version 330 core\n"
+	"#define MAX_LIGHTS 64\n"
 	"out vec4 FragColor;\n"
 	
 	"struct Material {\n"
 	"    	sampler2D texture1;\n"
 	"    	sampler2D texture2;\n"
 	"    	float shininess;\n"
-	"}; \n"
+	"};\n"
 	"struct DirLight {\n"	//the sun.
 	"    	vec3 direction;\n"
 	"    	vec3 ambient;\n"
 	"    	vec3 diffuse;\n"
-	"	vec3 specular;\n"
+	"		vec3 specular;\n"
 	"};\n"
 	"struct PointLight {\n"
 	"	vec3 position;\n"
@@ -78,7 +81,7 @@ const char *fragmentShaderSource =
 
 	"uniform vec3 viewPos;\n"
 	"uniform DirLight dirLight;\n"
-	"uniform PointLight pointLights[5];\n"
+	"uniform PointLight pointLights[MAX_LIGHTS];\n"
 	"uniform SpotLight spotLight;\n"
 	"uniform Material material;\n"
 
@@ -93,9 +96,9 @@ const char *fragmentShaderSource =
 	"void main()\n"
 	"{\n"
 	"vec3 norm = normalize(Normal);\n"
-    	"vec3 viewDir = normalize(viewPos - FragPos);\n"
+    "vec3 viewDir = normalize(viewPos - FragPos);\n"
 	//"	FragColor = vec4(result, 1.0);\n"
-	//"   	FragColor = vertexCol;\n"						//only color
+	//" FragColor = vertexCol;\n"						//only color
 	//"	FragColor = texture(ourTexture, TexCoord);\n"	//just texture
 	//"	FragColor = texture(ourTexture, TexCoord) * vec4(vertexCol);\n"	//add rgb
 	//"	FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), mixer); * result\n"
@@ -157,7 +160,7 @@ const char *fragmentShaderSource =
 	"	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);\n"
 	"	// attenuation\n"
 	"	float distance = length(light.position - fragPos);\n"
-	"	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    \n"
+	"	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));\n"
 	"	// spotlight intensity\n"
 	"	float theta = dot(lightDir, normalize(-light.direction)); \n"
 	"	float epsilon = light.cutOff - light.outerCutOff;\n"
@@ -216,6 +219,51 @@ const char *fragmentShaderSrcTXT =
 	"	vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);\n"
 	"	color = vec4(textColor, 1.0) * sampled;\n"
 	"}\n";
+
+//default shaders
+const char *vertexShaderSrc_Minimal =
+	"#version 330 core\n"
+    "layout (location = 0) in vec3 aPos;\n"
+	"uniform mat4 model;\n"
+	"uniform mat4 view;\n"
+	"uniform mat4 projection;"
+    "void main()\n"
+    "{\n"
+    "   gl_Position = projection * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n" //vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+    "}\n\0";
+
+const char *fragmentShaderSrc_Minimal =
+	"#version 330 core\n"
+	"out vec4 FragColor;\n"
+	"uniform vec3 color;\n"
+    "void main()\n"
+    "{\n"
+	"	FragColor = vec4(color, 1.0);\n"
+    "}\n\0";
+
+//light but no texture
+const char *vertexShaderSrc_NoTexture =
+	"#version 330 core\n"
+    "layout (location = 0) in vec3 aPos;\n"
+	"layout (location = 1) in vec3 aNormal;\n"
+	"uniform mat4 model;\n"
+	"uniform mat4 view;\n"
+	"uniform mat4 projection;"
+    "void main()\n"
+    "{\n"
+    "   gl_Position = projection * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n" //vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+    "}\0";
+
+const char *fragmentShaderSrc_NoTexture =
+	"#version 330 core\n"
+    "out vec4 FragColor;\n"
+    "void main()\n"
+    "{\n"
+    //"   FragColor = vertexCol;\n"						//only color
+	//"	FragColor = texture(ourTexture, TexCoord);\n"	//just texture
+	//"	FragColor = texture(ourTexture, TexCoord) * vec4(vertexCol);\n"	//add rgb
+	"	FragColor = vec4(0.4f, 0.5f, 0.7f, 1.0f);\n"
+    "}\n\0";
 
 void loadShaders(const char* vsSource, const char* fsSource, unsigned int* programID) {
 	unsigned int vs, fs;

@@ -53,7 +53,7 @@ int Window_init(int wid, int high, char* title) {
 	//mat4[0][3] == 0, mat4[3][0] == 4
 
 	glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSwapInterval(1);	//1 for vsync, 0 not
+	glfwSwapInterval(0);	//1 for vsync, 0 not
 	int temp_high, temp_wid = 0;
 	get_resolution(&temp_wid, &temp_high);
 	glfwSetWindowPos(window.handle, (temp_wid-window.wid)/2, (temp_high-window.high)/2); //set the window position to mid
@@ -61,9 +61,10 @@ int Window_init(int wid, int high, char* title) {
 	initRender();
 	initWorld();
 	//loadShaders(vertexShaderSource, fragmentShaderSource);
-	loadShaders(vertexShaderSource, fragmentShaderSource, &programIDMain);			//main shader + program
-	loadShaders(vertexShaderSrcTXT, fragmentShaderSrcTXT, &programIDTxt);			//secondary shader + program
-	loadShaders(vertexLightShaderSrc, fragmentLightShaderSrc, &programIDLight);
+	loadShaders(vertexShaderSource, fragmentShaderSource, &programIDMain);				//main shader + program
+	loadShaders(vertexShaderSrcTXT, fragmentShaderSrcTXT, &programIDTxt);				//secondary shader + program
+	loadShaders(vertexLightShaderSrc, fragmentLightShaderSrc, &programIDLight);			//light shader + program
+	loadShaders(vertexShaderSrc_Minimal, fragmentShaderSrc_Minimal, &programIDSimple);	//simple shader + program
 	
 	glUseProgram(programIDMain);
 	//glUseProgram(programIDTxt);
@@ -334,11 +335,13 @@ void window_loop() {
 		window.time_passed += window.dt;
 
 	    //printf("time: %f\n", window.time_passed);
+		/*
 	    if (window.tick >= 999999) { //3330
 	    	glfwDestroyWindow(window.handle);
 			window.handle = NULL;
 	    	break;
 	    }
+		*/
 
 	    glClearColor(0.36f, 0.66f, 0.86f, 1.0f);
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -372,7 +375,7 @@ void window_loop() {
 				//world.objList[i].coordinates[0] = 15 * sin(glm_rad(window.tick_float));	//need a sudo +=
 				//updateOBB(&world.objList[i].box, world.objList[i].coordinates, world.objList[i].scale_dim[0]/2.0f, world.objList[i].scale_dim[1]/2.0f, world.objList[i].scale_dim[2]/2.0f, world.objList[i].orientation_axis, world.objList[i].rotation);
 			}
-			if (ComputeResolveCollisions(&player, &world.objList[i], window.dt * TICK_RATE)) {
+			if (world.objList[i].hasCollision == true && ComputeResolveCollisions(&player, &world.objList[i], window.dt * TICK_RATE)) {
 				isColliding = true;
 			}
 		}
@@ -414,37 +417,48 @@ void window_loop() {
 			updateObjPos(&world.objList[i], window.dt, window.tick_float);
 		}
 		
-		glEnable(GL_DEPTH_TEST);
-		unsigned int viewLoc  = glGetUniformLocation(programIDMain, "view");
-		unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
+		//glEnable(GL_DEPTH_TEST);
+		//unsigned int viewLoc  = glGetUniformLocation(programIDMain, "view");
+		//unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
+		//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
+		//glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
 		//currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 
 		for (unsigned int i = 0; i < world.objCount; i++) {
 			//printf("%f, %f, %f\n", world.objList[i].coordinates[0], world.objList[i].coordinates[1], world.objList[i].coordinates[2]);
 			
 			if (world.objList[i].lightSrc == false) {
-				int count = 0;
-			    	Object *closest_src_list = findClosestLightSrc(world.objList[i], &count);	//self doesn't matter since we know not light source
-			    	glUseProgram(programIDMain);
-			    	glEnable(GL_DEPTH_TEST);
-			    	unsigned int viewLoc  = glGetUniformLocation(programIDMain, "view");
-				unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
-				glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
-				glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
-			    	drawObject(world.objList[i], programIDMain, closest_src_list, count, player.camera);
-			    	//printf("hy\n");
-			    	free(closest_src_list);
-		    	} else {
-		    		glUseProgram(programIDLight);
-		    		glEnable(GL_DEPTH_TEST);
-		    		unsigned int TviewLoc  = glGetUniformLocation(programIDLight, "view");
+				if (world.objList[i].type == meshType_OBJ) {
+					glUseProgram(programIDSimple);
+					glEnable(GL_DEPTH_TEST);
+					unsigned int TviewLoc  = glGetUniformLocation(programIDSimple, "view");
+					unsigned int TprojLoc  = glGetUniformLocation(programIDSimple, "projection");
+					glUniformMatrix4fv(TviewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
+					glUniformMatrix4fv(TprojLoc, 1, GL_FALSE, (float*)projection);
+					//ALTdrawObject(world.objList[i], programIDSimple);
+					drawObjectSimple(world.objList[i], programIDSimple);
+				} else {
+					int count = 0;
+					Object *closest_src_list = findClosestLightSrc(world.objList[i], &count);	//self doesn't matter since we know not light source
+					glUseProgram(programIDMain);
+					glEnable(GL_DEPTH_TEST);
+					unsigned int viewLoc  = glGetUniformLocation(programIDMain, "view");
+					unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
+					glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
+					glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
+					drawObject(world.objList[i], programIDMain, closest_src_list, count, player.camera);
+					//printf("hy\n");
+					free(closest_src_list);
+				}
+		    } else {
+				glUseProgram(programIDLight);
+				glEnable(GL_DEPTH_TEST);
+				unsigned int TviewLoc  = glGetUniformLocation(programIDLight, "view");
 				unsigned int TprojLoc  = glGetUniformLocation(programIDLight, "projection");
 				glUniformMatrix4fv(TviewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
 				glUniformMatrix4fv(TprojLoc, 1, GL_FALSE, (float*)projection);
-		    		drawObjectLight(world.objList[i], programIDLight);
-		    	}
+				drawObjectLight(world.objList[i], programIDLight);
+		    }
 		}
 		glDisable(GL_DEPTH_TEST);
 		

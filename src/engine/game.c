@@ -74,6 +74,11 @@ void initWorld() {
 	//extra
 	addObj(meshType_cube, true, (vec3){12.0f, 1.0f, 1.0f}, (vec3){1.5f, 1.50f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 8, &updateObjVelFuncXZCircle);
 	world.objList[8].lightSrc = false;
+
+	//extra
+	addObj(meshType_OBJ, true, (vec3){0.0f, 2.3f, 7.0f}, (vec3){0.5f, 0.5f, 0.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 9, NULL);
+	world.objList[9].hasCollision = false;
+	world.objList[9].lightSrc = false;
 	
 	checkObjList(&player);
 }
@@ -88,6 +93,7 @@ void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, fl
 	ex.ID = index;
 	ex.type = t;
 	ex.one_txture = one_txt;
+	ex.hasCollision = true;
 	glm_vec3_copy(coords, ex.coordinates);
 	glm_vec3_copy(scale, ex.scale_dim);
 	glm_vec3_copy(rot_axis, ex.orientation_axis);

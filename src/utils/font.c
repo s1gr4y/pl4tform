@@ -1,4 +1,4 @@
-#include "../include/font.h"
+#include "font.h"
 
 unsigned int VAOtxt, VBOtxt;
 Character charList[128];

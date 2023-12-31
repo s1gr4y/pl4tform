@@ -10,6 +10,8 @@
 #include "../include/OBB.h"
 #include "../include/camera.h"
 
+#include "../include/obj_loader.h"
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,19 +21,18 @@
 typedef enum {
 	meshType_cube = 0,
 	meshType_triangle = 1,
-	meshType_cube_light = 2
+	meshType_cube_light = 2,
+	meshType_OBJ = 3
 } meshType;
 
 typedef struct Mesh {
 	//  render data
 	unsigned int VAO, VBO, EBO;
-	unsigned int txture[3];
+	unsigned int textures[16];
 	// mesh data, all arrs
-	//struct Vertex *vertices;
 	float *vertices;
-	float *indices;
-	float *textures;
-	int indexSize;
+	int *indices;
+	unsigned int indexSize;
 	//struct Texture *textures;
 } Mesh;
 
@@ -45,11 +46,13 @@ typedef struct Object {	//needs orientation (vec3 rotation and axis)
 	meshType type;
 	bool one_txture;
 	bool lightSrc;
+	bool hasCollision;
 	vec3 futureVel;
 	vec3 velocity;
 	void (*velFunc)(float, float, float, vec3);
 	vec3 coordinates;
 	vec3 scale_dim;
+	vec3 collisionHULL_dim;
 	vec3 orientation_axis;
 	struct OBB box;
 	float rotation;	//in deg
@@ -57,11 +60,15 @@ typedef struct Object {	//needs orientation (vec3 rotation and axis)
 
 void initRender();
 void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *indices, unsigned int indexSize);
+void setupSimpleMesh(struct Mesh *mesh, float **verts, unsigned int vertSize, int **indices, unsigned int indexSize);
 void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_name);
 void generateVAO_VBO_text();
 void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int count, Camera camera);
 void drawObjectLight(struct Object obj, unsigned int pID);
+void drawObjectSimple(struct Object obj, unsigned int pID);
 
-extern Mesh meshList[3];
+void ALTdrawObject(struct Object obj, unsigned int pID);
+
+extern Mesh meshList[4];
 
 #endif

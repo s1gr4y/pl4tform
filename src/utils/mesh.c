@@ -3,11 +3,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../Dependencies/stb_image.h"
 
-Mesh meshList[3];	//only tri and cubes
+Mesh meshList[4];	//only tri and cubes
 
 void initRender() {
 	//glActiveTexture(GL_TEXTURE0 + 1); //say we have 16 txtures.
-	/*
+	///*
 	float square_vertices[] = { //x,y,z | x,y
 		//front / back faces
 		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -42,6 +42,7 @@ void initRender() {
 		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f
 	};
+
 	int square_posIndices[] = {
 		0, 1, 2,	//sq 1:
 		1, 2, 3,
@@ -61,7 +62,7 @@ void initRender() {
 		20, 21, 22,	//sq 6:
 		21, 22, 23
 	};
-	*/
+	//*/
 	
 	float vertices[] = {
 		// positions          // normals           // texture coords
@@ -110,18 +111,18 @@ void initRender() {
 
 	float triangle_vertices[] = { //x,y,z | x,y
 		//front / back faces
-		 0.5f, -0.5f,  -0.5f,  1.0f, 0.0f,	//bottom right | -z
-		-0.5f, -0.5f,  -0.5f,  0.0f, 0.0f,	//bottom left
-		 0.0f,  0.5f,  0.0f,  0.5f, 1.0f,	//top mid.
+		 0.5f, -0.5f,  -0.5f, 	//bottom right | -z
+		-0.5f, -0.5f,  -0.5f,  	//bottom left
+		 0.0f,  0.5f,  0.0f,  	//top mid.
 
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,	//bottom right | +z
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,	//bottom left
+		 0.5f, -0.5f,  0.5f,  	//bottom right | +z
+		-0.5f, -0.5f,  0.5f,  	//bottom left
 
 		 //0.0f,  0.5f,  0.0f,  0.5f, 1.0f,	//top mid.	//redundant
-		 0.5f, -0.5f,  -0.5f,  1.0f, 0.0f,	//bottom right | -z
-		-0.5f, -0.5f,  -0.5f,  0.0f, 0.0f,	//bottom left
-		 0.5f, -0.5f,  0.5f,  1.0f, 1.0f,	//bottom right | +z
-		-0.5f, -0.5f,  0.5f,  0.0f, 1.0f	//bottom left
+		 0.5f, -0.5f,  -0.5f,  	//bottom right | -z
+		-0.5f, -0.5f,  -0.5f,  	//bottom left
+		 0.5f, -0.5f,  0.5f,  	//bottom right | +z
+		-0.5f, -0.5f,  0.5f,  	//bottom left
 	};
 
 	int triangle_posIndices[] = {
@@ -139,17 +140,74 @@ void initRender() {
 
 	//0 == sq, 1 == triag
 	setupMesh(&(meshList[0]), vertices, sizeof(vertices), NULL, 0);
-	setupMesh(&(meshList[1]), triangle_vertices, sizeof(triangle_vertices), triangle_posIndices, sizeof(triangle_posIndices));
+	setupMesh(&(meshList[1]), square_vertices, sizeof(square_vertices), square_posIndices, sizeof(square_posIndices));
+
+	char p[] = "Resources/Models/cow.obj";
+	float* data;
+	unsigned int data_len;
+	int* indices;
+	unsigned int indices_len;
+	readObjFile(p, sizeof(p), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
+	printf("we read it vert %d\n", data_len);
+	printf("we read it idx %d\n", indices_len);
+	//for (int i = 0; i < data_len; i++) {
+	//	printf("data #%d = %f\n", i, data[i]);
+	//}
+	//for (int i = 0; i < indices_len; i++) {
+	//	printf("1. indices #%d = %d\n", i, indices[i]);
+	//}
+	setupSimpleMesh(&(meshList[3]), &data, data_len, &indices, indices_len);
 	
 	//setupMesh(&(meshList[2]), vertices, sizeof(vertices), NULL, 0);
 	glGenVertexArrays(1, &(meshList[2].VAO));
 	glGenVertexArrays(1, &(meshList[2].VBO));
 	glBindVertexArray((meshList[2].VAO));
-
 	glBindBuffer(GL_ARRAY_BUFFER, meshList[2].VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	glBindVertexArray(0);
+
+	setupSimpleMesh(&(meshList[3]), &data, data_len, &indices, indices_len);
+	//setupSimpleMesh(&(meshList[3]), square_vertices, sizeof(square_vertices), square_posIndices, sizeof(square_posIndices));
+	//setupSimpleMesh(&(meshList[3]), square_vertices, sizeof(square_vertices), square_posIndices, sizeof(square_posIndices));
+}
+
+void setupSimpleMesh(struct Mesh *mesh, float **verts, unsigned int vertSize, int **indices, unsigned int indexSize) {
+	glGenVertexArrays(1, &mesh->VAO);
+	glGenBuffers(1, &mesh->VBO);
+	glGenBuffers(1, &mesh->EBO);
+
+	// 1. bind Vertex Array Object
+	glBindVertexArray(mesh->VAO);
+
+	mesh->vertices = *verts;
+	mesh->indices = *indices;
+	mesh->indexSize = indexSize;
+
+	// 2. copy our vertices array in a vertex buffer for OpenGL to use
+	//gives it data
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertSize*sizeof(float), mesh->vertices, GL_STATIC_DRAW);
+
+	//glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(trigColors), trigColors, GL_STATIC_DRAW);
+
+	// 3. copy our index array in a element buffer for OpenGL to use
+	///*
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize*sizeof(int), mesh->indices, GL_STATIC_DRAW);
+
+	//*/
+
+
+	// 4. then set the vertex attributes pointers
+	///*
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	//*/
+	glBindVertexArray(0);
+	printf("here now\n");
 }
 
 void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *indices, unsigned int indexSize) {
@@ -196,13 +254,14 @@ void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *i
 	generateTexture(mesh, 2, "Resources/Textures/dev_64.png");
 	//glUniform1f(glGetUniformLocation(programID, "mixer"), 0.5f);
 	mesh->indexSize = indexSize;
+	glBindVertexArray(0);
 }
 
 void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_name) {
 	//glActiveTexture(GL_TEXTURE0 + txtIndex); //0 - 16, cycle influences it.
 	//unsigned int texture;
-	glGenTextures(1, &mesh->txture[txtIndex]);
-    glBindTexture(GL_TEXTURE_2D, mesh->txture[txtIndex]); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+	glGenTextures(1, &mesh->textures[txtIndex]);
+    glBindTexture(GL_TEXTURE_2D, mesh->textures[txtIndex]); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
     //set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -275,7 +334,7 @@ void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int coun
 	mat3 matrixNormal;
 	for (int i = 0; i < 3; i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, mesh.txture[i]);
+		glBindTexture(GL_TEXTURE_2D, mesh.textures[i]);
 	}
 	glBindVertexArray(mesh.VAO);
 	glm_mat4_identity(model);
@@ -284,13 +343,13 @@ void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int coun
 	glm_scale(model, obj.scale_dim);
 	
 	glUniform3f(glGetUniformLocation(pID, "viewPos"), camera.cameraPos[0], camera.cameraPos[1], camera.cameraPos[2]);
-        glUniform1f(glGetUniformLocation(pID,"material.shininess"), 8.0f);
-        glUniform1i(glGetUniformLocation(pID,"LIGHT_CAP"), count);
+	glUniform1f(glGetUniformLocation(pID,"material.shininess"), 8.0f);
+	glUniform1i(glGetUniformLocation(pID,"LIGHT_CAP"), count);
 	
 	glUniform3f(glGetUniformLocation(pID, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
-        glUniform3f(glGetUniformLocation(pID, "dirLight.ambient"), 0.05f, 0.05f, 0.05f);
-        glUniform3f(glGetUniformLocation(pID, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
-        glUniform3f(glGetUniformLocation(pID, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
+	glUniform3f(glGetUniformLocation(pID, "dirLight.ambient"), 0.05f, 0.05f, 0.05f);
+	glUniform3f(glGetUniformLocation(pID, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
+	glUniform3f(glGetUniformLocation(pID, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
         
         
         //char line[] = pointLights[0].position
@@ -367,6 +426,30 @@ void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int coun
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	//glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
 	//glBindVertexArray(0);
+}
+
+void drawObjectSimple(struct Object obj, unsigned int pID) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
+	// draw model
+	Mesh mesh = meshList[obj.type];
+	mat4 model;
+	vec3 color = GLM_VEC3_ZERO_INIT;
+	color[0] = 0.3f; color[1] = 0.5f; color[0] = 0.7f;
+	
+	glBindVertexArray(mesh.VAO);
+	glm_mat4_identity(model);
+	glm_translate(model, obj.coordinates);
+	glm_rotate(model, glm_rad(obj.rotation), obj.orientation_axis);
+	glm_scale(model, obj.scale_dim);
+
+	unsigned int colorLoc = glGetUniformLocation(pID, "color");
+	glUniform3fv(colorLoc, 1, (float*)color);
+	
+	unsigned int modelLoc = glGetUniformLocation(pID, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)model);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
+	//printf("%d\n", mesh.indexSize);
+	glBindVertexArray(0);
 }
 
 void drawObjectLight(struct Object obj, unsigned int pID) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
