@@ -74,6 +74,7 @@ const char *fragmentShaderSource =
 	"};\n"
 	
 	"uniform int LIGHT_CAP;\n"
+	"uniform int using_color;\n"
 
 	"in vec3 FragPos;\n"
 	"in vec3 Normal;\n"
@@ -84,6 +85,7 @@ const char *fragmentShaderSource =
 	"uniform PointLight pointLights[MAX_LIGHTS];\n"
 	"uniform SpotLight spotLight;\n"
 	"uniform Material material;\n"
+	"uniform vec3 color"
 
 	//"uniform sampler2D texture1;\n"
 	//"uniform sampler2D texture2;\n"

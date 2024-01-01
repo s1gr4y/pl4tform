@@ -6,13 +6,17 @@
 #include "../include/physics.h"
 
 typedef struct World_State {
-	struct Object *objList;
+	struct Object* objList;
 	unsigned int objCount;
-	unsigned int listMax;
+	unsigned int objMax;
+
+	struct Mesh* meshList;
+	unsigned int meshCount;
+	unsigned int meshMax;
 } World_State;
 
 void initWorld();
-void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, float angle, unsigned int index, void (*f)(float, float, float, vec3));
+void addObj(meshType t, char* path, bool one_txt, bool isLightSource, vec3 coords, vec3 scale, vec3 rot_axis, float angle, unsigned int index, void (*f)(float, float, float, vec3));
 void updateObjPos(Object* obj, float dt, float float_tick);
 void updateObjVel(Object* obj, float dt, float float_tick);
 void updateObjVelFuncXZCircle(float float_tick, float offset, float r, vec3 ret);

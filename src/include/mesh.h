@@ -19,10 +19,11 @@
 #include <math.h>
 
 typedef enum {
-	meshType_cube = 0,
-	meshType_triangle = 1,
-	meshType_cube_light = 2,
-	meshType_OBJ = 3
+	meshType_cube_simple = 0,
+	meshType_cube_light = 1,
+	meshType_OBJ_simple = 2,
+	meshType_OBJ_light = 3,
+	meshType_OBJ_all = 4
 } meshType;
 
 typedef struct Mesh {
@@ -44,6 +45,7 @@ struct Texture {
 typedef struct Object {	//needs orientation (vec3 rotation and axis)
 	unsigned int ID;
 	meshType type;
+	int meshIdx;
 	bool one_txture;
 	bool lightSrc;
 	bool hasCollision;
@@ -59,6 +61,7 @@ typedef struct Object {	//needs orientation (vec3 rotation and axis)
 } Object;
 
 void initRender();
+void addMesh(meshType type, char* path);
 void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *indices, unsigned int indexSize);
 void setupSimpleMesh(struct Mesh *mesh, float **verts, unsigned int vertSize, int **indices, unsigned int indexSize);
 void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_name);
@@ -68,7 +71,5 @@ void drawObjectLight(struct Object obj, unsigned int pID);
 void drawObjectSimple(struct Object obj, unsigned int pID);
 
 void ALTdrawObject(struct Object obj, unsigned int pID);
-
-extern Mesh meshList[4];
 
 #endif

@@ -4,10 +4,145 @@ World_State world;
 Player player;
 const int TICK_RATE = 66;
 
+// primitive data objects
+	float square_vertices[] = { //x,y,z | x,y
+		//front / back faces
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+
+		//left / right faces
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		 //bottom / top faces
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f
+	};
+
+	int square_posIndices[] = {
+		0, 1, 2,	//sq 1:
+		1, 2, 3,
+
+		4, 5, 6,	//sq 2:
+		5, 6, 7,
+
+		8, 9, 10,	//sq 3:
+		9, 10, 11,
+
+		12, 13, 14,	//sq 4:
+		13, 14, 15,
+
+		16, 17, 18,	//sq 5:
+		17, 18, 19,
+
+		20, 21, 22,	//sq 6:
+		21, 22, 23
+	};
+	//*/
+	
+	float vertices[] = {
+		// positions          // normals           // texture coords
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+    	};
+
+	float triangle_vertices[] = { //x,y,z | x,y
+		//front / back faces
+		 0.5f, -0.5f,  -0.5f, 	//bottom right | -z
+		-0.5f, -0.5f,  -0.5f,  	//bottom left
+		 0.0f,  0.5f,  0.0f,  	//top mid.
+
+		 0.5f, -0.5f,  0.5f,  	//bottom right | +z
+		-0.5f, -0.5f,  0.5f,  	//bottom left
+
+		 //0.0f,  0.5f,  0.0f,  0.5f, 1.0f,	//top mid.	//redundant
+		 0.5f, -0.5f,  -0.5f,  	//bottom right | -z
+		-0.5f, -0.5f,  -0.5f,  	//bottom left
+		 0.5f, -0.5f,  0.5f,  	//bottom right | +z
+		-0.5f, -0.5f,  0.5f,  	//bottom left
+	};
+
+	int triangle_posIndices[] = {
+		0, 1, 2,	//tri 1: back
+
+		0, 3, 2,	//tri 2: right
+
+		1, 4, 2,	//tri 3: left
+
+		3, 4, 2,	//tri 4: front
+
+		5, 6, 7,	//bottom piece 1:
+		6, 8, 7		//bottom piece 2:
+	};
+
 void initWorld() {
+	memset(world, 0, sizof(world));
 	world.objList = NULL;
 	world.objCount = 0;
 	world.listMax = 1;
+
+	world.meshCount = 0;
+	world.meshMax = 1;
 	player.resetVelAdded = false;
 
 	player.mass = 10.0f;	//does nothing for now.
@@ -61,7 +196,7 @@ void initWorld() {
 		//}
 	}
 	//add last for debug testing
-	addObj(meshType_cube, true, (vec3){-5.5f, 0.8f, -3.5f}, (vec3){3.2f, 1.0f, 3.2f}, (vec3){1.0f, 0.0f, 0.0f}, 45.0f, 5, &updateObjVelFuncXZCircle);
+	addObj(meshType_cube_simple, true, (vec3){-5.5f, 0.8f, -3.5f}, (vec3){3.2f, 1.0f, 3.2f}, (vec3){1.0f, 0.0f, 0.0f}, 45.0f, 5, &updateObjVelFuncXZCircle);
 	world.objList[5].lightSrc = false;
 	
 	//add light source.
@@ -72,21 +207,21 @@ void initWorld() {
 	world.objList[7].lightSrc = true;
 	
 	//extra
-	addObj(meshType_cube, true, (vec3){12.0f, 1.0f, 1.0f}, (vec3){1.5f, 1.50f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 8, &updateObjVelFuncXZCircle);
+	addObj(meshType_cube_simple, true, (vec3){12.0f, 1.0f, 1.0f}, (vec3){1.5f, 1.50f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 8, &updateObjVelFuncXZCircle);
 	world.objList[8].lightSrc = false;
 
 	//extra
-	addObj(meshType_OBJ, true, (vec3){0.0f, 2.3f, 7.0f}, (vec3){0.5f, 0.5f, 0.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 9, NULL);
+	addObj(meshType_OBJ_simple, true, (vec3){0.0f, 2.3f, 7.0f}, (vec3){0.5f, 0.5f, 0.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 9, NULL);
 	world.objList[9].hasCollision = false;
 	world.objList[9].lightSrc = false;
 	
 	checkObjList(&player);
 }
 
-void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, float angle, unsigned int index, void (*f)(float, float, float, vec3)) {
+void addObj(meshType t, char* path, bool one_txt, bool isLightSource, vec3 coords, vec3 scale, vec3 rot_axis, float angle, unsigned int index, void (*f)(float, float, float, vec3)) {
 	world.objCount++;
-	if (world.listMax <= world.objCount) {
-		world.listMax *= 2;
+	if (world.objMax <= world.objCount) {
+		world.objMax *= 2;
 		world.objList = (Object*) realloc(world.objList, sizeof(Object) * world.listMax);
 	}
 	Object ex;
@@ -94,6 +229,7 @@ void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, fl
 	ex.type = t;
 	ex.one_txture = one_txt;
 	ex.hasCollision = true;
+	ex.lightSrc = isLightSource;
 	glm_vec3_copy(coords, ex.coordinates);
 	glm_vec3_copy(scale, ex.scale_dim);
 	glm_vec3_copy(rot_axis, ex.orientation_axis);
@@ -101,16 +237,45 @@ void addObj(meshType t, bool one_txt, vec3 coords, vec3 scale, vec3 rot_axis, fl
 	//glm_vec3_copy(GLM_VEC3_ZERO, ex.velocity);
 	//OBB
 	initOBB(&ex.box, coords, scale[0]/2.0f, scale[1]/2.0f, scale[2]/2.0f, ex.orientation_axis, angle);
-	if (one_txt == true) {
-		ex.velFunc = f;	//&updateObjVelFuncXZCircle	//updateObjVelFuncLinearFlat; //&updateObjVelFuncLinearFlat; //updateObjVelFuncXZCircle //updateObjVelFuncLinearFlat;
-		//ex.velFunc = NULL;
-	} else {
-		ex.velFunc = NULL;
-	}
+	ex.velFunc = f;	//&updateObjVelFuncXZCircle	//updateObjVelFuncLinearFlat; //&updateObjVelFuncLinearFlat; //updateObjVelFuncXZCircle //updateObjVelFuncLinearFlat;
 	glm_vec3_zero(ex.velocity);
 	glm_vec3_zero(ex.futureVel);
 
 	world.objList[world.objCount - 1] = ex;	//(Object){.type = t, .one_txture = one_txt, .coordinates = coords, .scale_dim = scale};
+}
+
+void addMesh(meshType type, char* path) {
+	int meshIdx = world.meshCount;
+	world.meshCount++;
+	if (world.MeshMax <= world.meshCount) {
+		world.MeshMax *= 2;
+		world.meshList = (Mesh*) realloc(world.meshList, sizeof(Object) * world.MeshMax);
+	}
+
+	float* data;
+	unsigned int data_len;
+	int* indices;
+	unsigned int indices_len;
+	readObjFile(p, sizeof(p), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
+
+	switch type {
+		case meshType_cube:
+			setupMesh(&(world.meshList[meshIdx]), vertices, sizeof(vertices), NULL, 0);
+			break;
+		case meshType_cube_light:
+			setupMesh(&(world.meshList[meshIdx]), vertices, sizeof(vertices), NULL, 0);
+			break;
+		case meshType_OBJ_simple:
+			readObjFile(path, sizeof(path), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
+			setupSimpleMesh(&(world.meshList[meshIdx]), &data, data_len, &indices, indices_len);
+			break;
+		case meshType_OBJ_light:
+			readObjFile(path, sizeof(path), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
+			setupSimpleMesh(&(world.meshList[meshIdx]), &data, data_len, &indices, indices_len);
+			break;
+		case default:
+			break;
+	}
 }
 
 void updateObjPos(Object* obj, float dt, float float_tick) {	//to fix velocity post loop desync we need to have list of obj player got it's vel from then update it when it changes

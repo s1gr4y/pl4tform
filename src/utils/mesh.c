@@ -3,140 +3,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../Dependencies/stb_image.h"
 
-Mesh meshList[4];	//only tri and cubes
-
 void initRender() {
 	//glActiveTexture(GL_TEXTURE0 + 1); //say we have 16 txtures.
 	///*
-	float square_vertices[] = { //x,y,z | x,y
-		//front / back faces
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-
-		//left / right faces
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-		 //bottom / top faces
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f
-	};
-
-	int square_posIndices[] = {
-		0, 1, 2,	//sq 1:
-		1, 2, 3,
-
-		4, 5, 6,	//sq 2:
-		5, 6, 7,
-
-		8, 9, 10,	//sq 3:
-		9, 10, 11,
-
-		12, 13, 14,	//sq 4:
-		13, 14, 15,
-
-		16, 17, 18,	//sq 5:
-		17, 18, 19,
-
-		20, 21, 22,	//sq 6:
-		21, 22, 23
-	};
-	//*/
-	
-	float vertices[] = {
-		// positions          // normals           // texture coords
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-    	};
-
-	float triangle_vertices[] = { //x,y,z | x,y
-		//front / back faces
-		 0.5f, -0.5f,  -0.5f, 	//bottom right | -z
-		-0.5f, -0.5f,  -0.5f,  	//bottom left
-		 0.0f,  0.5f,  0.0f,  	//top mid.
-
-		 0.5f, -0.5f,  0.5f,  	//bottom right | +z
-		-0.5f, -0.5f,  0.5f,  	//bottom left
-
-		 //0.0f,  0.5f,  0.0f,  0.5f, 1.0f,	//top mid.	//redundant
-		 0.5f, -0.5f,  -0.5f,  	//bottom right | -z
-		-0.5f, -0.5f,  -0.5f,  	//bottom left
-		 0.5f, -0.5f,  0.5f,  	//bottom right | +z
-		-0.5f, -0.5f,  0.5f,  	//bottom left
-	};
-
-	int triangle_posIndices[] = {
-		0, 1, 2,	//tri 1: back
-
-		0, 3, 2,	//tri 2: right
-
-		1, 4, 2,	//tri 3: left
-
-		3, 4, 2,	//tri 4: front
-
-		5, 6, 7,	//bottom piece 1:
-		6, 8, 7		//bottom piece 2:
-	};
 
 	//0 == sq, 1 == triag
 	setupMesh(&(meshList[0]), vertices, sizeof(vertices), NULL, 0);
@@ -168,7 +37,7 @@ void initRender() {
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 
-	setupSimpleMesh(&(meshList[3]), &data, data_len, &indices, indices_len);
+	//setupSimpleMesh(&(meshList[3]), &data, data_len, &indices, indices_len);
 	//setupSimpleMesh(&(meshList[3]), square_vertices, sizeof(square_vertices), square_posIndices, sizeof(square_posIndices));
 	//setupSimpleMesh(&(meshList[3]), square_vertices, sizeof(square_vertices), square_posIndices, sizeof(square_posIndices));
 }
@@ -341,6 +210,10 @@ void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int coun
 	glm_translate(model, obj.coordinates);
 	glm_rotate(model, glm_rad(obj.rotation), obj.orientation_axis);
 	glm_scale(model, obj.scale_dim);
+
+	if (count >= 64) {
+		count = 64;
+	}
 	
 	glUniform3f(glGetUniformLocation(pID, "viewPos"), camera.cameraPos[0], camera.cameraPos[1], camera.cameraPos[2]);
 	glUniform1f(glGetUniformLocation(pID,"material.shininess"), 8.0f);
@@ -352,8 +225,8 @@ void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int coun
 	glUniform3f(glGetUniformLocation(pID, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
         
         
-        //char line[] = pointLights[0].position
-        //fix later lazy
+    //char line[] = pointLights[0].position
+	//fix later lazy
 	for (int i = 0; i < count; i++) {
 		char buffer[64];
 		vec3 tmp = GLM_VEC3_ZERO_INIT;
