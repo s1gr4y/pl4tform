@@ -3,29 +3,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../Dependencies/stb_image.h"
 
-void initRender() {
+void initRender() {	//may not need anymore
 	//glActiveTexture(GL_TEXTURE0 + 1); //say we have 16 txtures.
-	///*
-
-	//0 == sq, 1 == triag
-	setupMesh(&(meshList[0]), vertices, sizeof(vertices), NULL, 0);
-	setupMesh(&(meshList[1]), square_vertices, sizeof(square_vertices), square_posIndices, sizeof(square_posIndices));
-
-	char p[] = "Resources/Models/cow.obj";
-	float* data;
-	unsigned int data_len;
-	int* indices;
-	unsigned int indices_len;
-	readObjFile(p, sizeof(p), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
-	printf("we read it vert %d\n", data_len);
-	printf("we read it idx %d\n", indices_len);
-	//for (int i = 0; i < data_len; i++) {
-	//	printf("data #%d = %f\n", i, data[i]);
-	//}
-	//for (int i = 0; i < indices_len; i++) {
-	//	printf("1. indices #%d = %d\n", i, indices[i]);
-	//}
-	setupSimpleMesh(&(meshList[3]), &data, data_len, &indices, indices_len);
+	/*
 	
 	//setupMesh(&(meshList[2]), vertices, sizeof(vertices), NULL, 0);
 	glGenVertexArrays(1, &(meshList[2].VAO));
@@ -36,50 +16,14 @@ void initRender() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
+	*/
 
 	//setupSimpleMesh(&(meshList[3]), &data, data_len, &indices, indices_len);
 	//setupSimpleMesh(&(meshList[3]), square_vertices, sizeof(square_vertices), square_posIndices, sizeof(square_posIndices));
 	//setupSimpleMesh(&(meshList[3]), square_vertices, sizeof(square_vertices), square_posIndices, sizeof(square_posIndices));
 }
 
-void setupSimpleMesh(struct Mesh *mesh, float **verts, unsigned int vertSize, int **indices, unsigned int indexSize) {
-	glGenVertexArrays(1, &mesh->VAO);
-	glGenBuffers(1, &mesh->VBO);
-	glGenBuffers(1, &mesh->EBO);
-
-	// 1. bind Vertex Array Object
-	glBindVertexArray(mesh->VAO);
-
-	mesh->vertices = *verts;
-	mesh->indices = *indices;
-	mesh->indexSize = indexSize;
-
-	// 2. copy our vertices array in a vertex buffer for OpenGL to use
-	//gives it data
-	glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertSize*sizeof(float), mesh->vertices, GL_STATIC_DRAW);
-
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(trigColors), trigColors, GL_STATIC_DRAW);
-
-	// 3. copy our index array in a element buffer for OpenGL to use
-	///*
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize*sizeof(int), mesh->indices, GL_STATIC_DRAW);
-
-	//*/
-
-
-	// 4. then set the vertex attributes pointers
-	///*
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	//*/
-	glBindVertexArray(0);
-	printf("here now\n");
-}
-
-void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *indices, unsigned int indexSize) {
+void setupSimpleMesh(struct Mesh *mesh, float *verts, unsigned int vertSize, int *indices, unsigned int indexSize) {
 	//unsigned int VBO, VAO, EBO;
 	glGenVertexArrays(1, &mesh->VAO);
 	glGenBuffers(1, &mesh->VBO);
@@ -88,18 +32,84 @@ void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *i
 	// 1. bind Vertex Array Object
 	glBindVertexArray(mesh->VAO);
 
+	if (verts != NULL) {
+		mesh->vertices = verts;
+	} else {
+		mesh->vertices = NULL;
+	}
+	if (indices != NULL) {
+		mesh->indices = indices;
+	} else {
+		mesh->indices = NULL;
+	}
+	mesh->indexSize = indexSize;
+
 	// 2. copy our vertices array in a vertex buffer for OpenGL to use
 	//gives it data
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertSize, vertices, GL_STATIC_DRAW);
-
+	glBufferData(GL_ARRAY_BUFFER, vertSize*sizeof(float), mesh->vertices, GL_STATIC_DRAW);
 	//glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(trigColors), trigColors, GL_STATIC_DRAW);
 
 	// 3. copy our index array in a element buffer for OpenGL to use
 	///*
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize, indices, GL_STATIC_DRAW);
+	if (mesh->indices != NULL) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize*sizeof(int), mesh->indices, GL_STATIC_DRAW);
+	}
+
+	//*/
+
+	// 4. then set the vertex attributes pointers
+	///*
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	//*/
+	glBindVertexArray(0);
+}
+
+void setupMesh(struct Mesh *mesh, float **vertices, unsigned int vertSize, int **indices, unsigned int indexSize) {
+	printf("hello guys why tf can't we do anything right?? x42069\n");
+	//unsigned int VBO, VAO, EBO;
+	glGenVertexArrays(1, &mesh->VAO);
+	glGenBuffers(1, &mesh->VBO);
+	glGenBuffers(1, &mesh->EBO);
+
+	// 1. bind Vertex Array Object
+	glBindVertexArray(mesh->VAO);
+
+	if (vertices != NULL) {
+		mesh->vertices = *vertices;
+	} else {
+		mesh->vertices = NULL;
+	}
+	if (indices != NULL) {
+		mesh->indices = *indices;
+	} else {
+		mesh->indices = NULL;
+	}
+	mesh->indexSize = indexSize;
+
+	printf("hello guys why tf can't we do anything right?? brug\n");
+	//for (int i = 0; i < vertSize)
+
+	// 2. copy our vertices array in a vertex buffer for OpenGL to use
+	//gives it data
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertSize*sizeof(float), mesh->vertices, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(trigColors), trigColors, GL_STATIC_DRAW);
+
+	// 3. copy our index array in a element buffer for OpenGL to use
+	///*
+	if (mesh->indices != NULL) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize*sizeof(int), mesh->indices, GL_STATIC_DRAW);
+	}
 
 	//*/
 
@@ -118,11 +128,11 @@ void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *i
 	// -------------------------
 	//stbi_set_flip_vertically_on_load(true);
 	//glEnable(GL_TEXTURE_2D);
-	generateTexture(mesh, 0, "Resources/Textures/container.jpg");	//need to figure out why texture no work T_T; 6/17
+	// should pass in path to texture for given object but we will worry about that later
+	generateTexture(mesh, 0, "Resources/Textures/container.jpg");	//need to figure out why texture no work T_T; 6/17 (fixed a while ago (and forgot) but was an annoying bug, keeping comment)
 	generateTexture(mesh, 1, "Resources/Textures/crate.png");
 	generateTexture(mesh, 2, "Resources/Textures/dev_64.png");
 	//glUniform1f(glGetUniformLocation(programID, "mixer"), 0.5f);
-	mesh->indexSize = indexSize;
 	glBindVertexArray(0);
 }
 
@@ -195,9 +205,9 @@ void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_
     //glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int count, Camera camera) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
+void drawObject(struct Object obj, struct Mesh* mList, unsigned int pID, Object* lightObjs, int count, Camera camera) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
 	// draw model
-	Mesh mesh = meshList[obj.type];
+	Mesh mesh = mList[obj.meshIdx];
 	mat4 model;
 	mat4 tmpMatNorm;
 	mat3 matrixNormal;
@@ -216,8 +226,8 @@ void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int coun
 	}
 	
 	glUniform3f(glGetUniformLocation(pID, "viewPos"), camera.cameraPos[0], camera.cameraPos[1], camera.cameraPos[2]);
-	glUniform1f(glGetUniformLocation(pID,"material.shininess"), 8.0f);
-	glUniform1i(glGetUniformLocation(pID,"LIGHT_CAP"), count);
+	glUniform1f(glGetUniformLocation(pID, "material.shininess"), 8.0f);
+	glUniform1i(glGetUniformLocation(pID, "LIGHT_CAP"), count);
 	
 	glUniform3f(glGetUniformLocation(pID, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
 	glUniform3f(glGetUniformLocation(pID, "dirLight.ambient"), 0.05f, 0.05f, 0.05f);
@@ -265,15 +275,22 @@ void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int coun
         glUniform1f(glGetUniformLocation(pID, "spotLight.cutOff"), cosf(glm_rad(12.5f)));
         glUniform1f(glGetUniformLocation(pID, "spotLight.outerCutOff"), cosf(glm_rad(15.0f)));  
 	
-	
-	if (obj.one_txture == true) {
-		glUniform1i(glGetUniformLocation(pID, "material.texture1"), 2);
-		glUniform1i(glGetUniformLocation(pID, "material.texture2"), 2);
-		glUniform1f(glGetUniformLocation(pID, "mixer"), 1.0f);
+	if (obj.type == meshType_OBJ_simple || obj.type == meshType_OBJ_light) {	// aka is obj textured or not
+		glUniform1i(glGetUniformLocation(pID, "using_color"), 1);	// setting to 1 so we say we are using only color
+		vec3 color = GLM_VEC3_ZERO_INIT;
+		color[0] = 0.3f; color[1] = 0.5f; color[0] = 0.7f;			//setting arbitrary color
+		unsigned int colorLoc = glGetUniformLocation(pID, "color");
+		glUniform3fv(colorLoc, 1, (float*)color);
 	} else {
-		glUniform1i(glGetUniformLocation(pID, "material.texture1"), 1);
-		glUniform1i(glGetUniformLocation(pID, "material.texture2"), 1);
-		glUniform1f(glGetUniformLocation(pID, "mixer"), 0.5f);
+		if (obj.one_txture == true) {
+			glUniform1i(glGetUniformLocation(pID, "material.texture1"), 2);
+			glUniform1i(glGetUniformLocation(pID, "material.texture2"), 2);
+			glUniform1f(glGetUniformLocation(pID, "mixer"), 1.0f);
+		} else {
+			glUniform1i(glGetUniformLocation(pID, "material.texture1"), 1);
+			glUniform1i(glGetUniformLocation(pID, "material.texture2"), 1);
+			glUniform1f(glGetUniformLocation(pID, "mixer"), 0.5f);
+		}
 	}
 	
 	unsigned int matrixNormalLoc = glGetUniformLocation(pID, "matrixNormal");
@@ -296,14 +313,20 @@ void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int coun
 	
 	unsigned int modelLoc = glGetUniformLocation(pID, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)model);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	if (mesh.indexSize <= 0) {
+		printf("obj id %d\n", obj.ID);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	} else {
+		glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
+		printf("%d\n", mesh.indexSize);
+	}
 	//glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
-	//glBindVertexArray(0);
+	glBindVertexArray(0);
 }
 
-void drawObjectSimple(struct Object obj, unsigned int pID) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
+void drawObjectSimple(struct Object obj, struct Mesh* mList, unsigned int pID) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
 	// draw model
-	Mesh mesh = meshList[obj.type];
+	Mesh mesh = mList[obj.meshIdx];
 	mat4 model;
 	vec3 color = GLM_VEC3_ZERO_INIT;
 	color[0] = 0.3f; color[1] = 0.5f; color[0] = 0.7f;
@@ -325,8 +348,8 @@ void drawObjectSimple(struct Object obj, unsigned int pID) {	//debateable if nee
 	glBindVertexArray(0);
 }
 
-void drawObjectLight(struct Object obj, unsigned int pID) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
-	Mesh mesh = meshList[obj.type];
+void drawObjectLight(struct Object obj, struct Mesh* mList, unsigned int pID) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
+	Mesh mesh = mList[obj.meshIdx];
 	mat4 model;
 	mat4 tmpMatNorm;
 	mat3 matrixNormal;

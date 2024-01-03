@@ -136,10 +136,10 @@ const int TICK_RATE = 66;
 	};
 
 void initWorld() {
-	memset(world, 0, sizof(world));
+	memset((void*)&world, 0, sizeof(world));
 	world.objList = NULL;
 	world.objCount = 0;
-	world.listMax = 1;
+	world.objMax = 1;
 
 	world.meshCount = 0;
 	world.meshMax = 1;
@@ -177,52 +177,47 @@ void initWorld() {
 		{5.0f, 1.0f, -5.0f}
 	};
 
-	addObj(meshType_cube, false, objPositions[0], (vec3){20.0f, 0.1f, 20.0f}, (vec3){1.0f, 0.0f, 0.0f}, 0.0f, 0, NULL);
-	world.objList[0].lightSrc = false;
+	addObj(meshType_cube_simple, NULL, false, false, objPositions[0], (vec3){20.0f, 0.1f, 20.0f}, (vec3){1.0f, 0.0f, 0.0f}, 0.0f, 0, NULL);
 
 	for (int i = 1; i < 5; i++) {
 		//if (i % 2 == 0) {
 			//addObj(meshType_triangle, true, objPositions[i], (vec3){1.5f, 1.0f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, rand() % 91, i);
 		//} else {
 		if (i == 1) {
-			addObj(meshType_cube, true, objPositions[i], (vec3){1.0f, 1.0f, 1.0f}, (vec3){0.0f, 1.0f, 0.0f}, 45.0f, i, NULL);
-			world.objList[i].lightSrc = false;
+			addObj(meshType_cube_simple, NULL, true, false, objPositions[i], (vec3){1.0f, 1.0f, 1.0f}, (vec3){0.0f, 1.0f, 0.0f}, 45.0f, i, NULL);
 		} else {
 			vec3 tmp = {0.0f, 0.1f, 0.0f};
 			glm_vec3_add(tmp, objPositions[i], objPositions[i]);
-			addObj(meshType_cube, true, objPositions[i], (vec3){3.0f, 1.0f, 3.0f}, (vec3){(rand() % 11)/10.0f, 0.0f, (rand() % 11)/10.0f}, (rand() % 50)/1.0f, i, &updateObjVelFuncXZCircle);
-			world.objList[i].lightSrc = false;
+			addObj(meshType_cube_simple, NULL, true, false, objPositions[i], (vec3){3.0f, 1.0f, 3.0f}, (vec3){(rand() % 11)/10.0f, 0.0f, (rand() % 11)/10.0f}, (rand() % 50)/1.0f, i, &updateObjVelFuncXZCircle);
 		}
 		//}
 	}
 	//add last for debug testing
-	addObj(meshType_cube_simple, true, (vec3){-5.5f, 0.8f, -3.5f}, (vec3){3.2f, 1.0f, 3.2f}, (vec3){1.0f, 0.0f, 0.0f}, 45.0f, 5, &updateObjVelFuncXZCircle);
-	world.objList[5].lightSrc = false;
+	addObj(meshType_cube_simple, NULL, true, false, (vec3){-5.5f, 0.8f, -3.5f}, (vec3){3.2f, 1.0f, 3.2f}, (vec3){1.0f, 0.0f, 0.0f}, 45.0f, 5, &updateObjVelFuncXZCircle);
 	
 	//add light source.
-	addObj(meshType_cube_light, true, (vec3){0.0f, 4.0f, 0.0f}, (vec3){1.2f, 1.2f, 1.2f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 6, NULL);
-	world.objList[6].lightSrc = true;
+	addObj(meshType_cube_light, NULL, true, true, (vec3){0.0f, 4.0f, 0.0f}, (vec3){1.2f, 1.2f, 1.2f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 6, NULL);
 	
-	addObj(meshType_cube_light, true, (vec3){10.0f, -1.0f, 10.0f}, (vec3){3.0f, 1.0f, 3.0f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 7, &updateObjVelFuncVertical);
-	world.objList[7].lightSrc = true;
+	//another light source.
+	addObj(meshType_cube_light, NULL, true, true, (vec3){10.0f, -1.0f, 10.0f}, (vec3){3.0f, 1.0f, 3.0f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 7, &updateObjVelFuncVertical);
 	
 	//extra
-	addObj(meshType_cube_simple, true, (vec3){12.0f, 1.0f, 1.0f}, (vec3){1.5f, 1.50f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 8, &updateObjVelFuncXZCircle);
-	world.objList[8].lightSrc = false;
+	int res = addObj(meshType_cube_simple, NULL, true, false, (vec3){12.0f, 1.0f, 1.0f}, (vec3){1.5f, 1.50f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 8, &updateObjVelFuncXZCircle);
+	printf("double checking res is %d\n", res);
+	//world.objList[8].lightSrc = false;
 
 	//extra
-	addObj(meshType_OBJ_simple, true, (vec3){0.0f, 2.3f, 7.0f}, (vec3){0.5f, 0.5f, 0.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 9, NULL);
+	addObj(meshType_OBJ_light, "Resources/Models/teapot.obj", true, false, (vec3){0.0f, 2.3f, 7.0f}, (vec3){0.5f, 0.5f, 0.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 9, NULL);
 	world.objList[9].hasCollision = false;
-	world.objList[9].lightSrc = false;
 	
 	checkObjList(&player);
 }
 
-void addObj(meshType t, char* path, bool one_txt, bool isLightSource, vec3 coords, vec3 scale, vec3 rot_axis, float angle, unsigned int index, void (*f)(float, float, float, vec3)) {
+int addObj(meshType t, char* path, bool one_txt, bool isLightSource, vec3 coords, vec3 scale, vec3 rot_axis, float angle, unsigned int index, void (*f)(float, float, float, vec3)) {
 	world.objCount++;
 	if (world.objMax <= world.objCount) {
 		world.objMax *= 2;
-		world.objList = (Object*) realloc(world.objList, sizeof(Object) * world.listMax);
+		world.objList = (Object*) realloc(world.objList, sizeof(Object) * world.objMax);
 	}
 	Object ex;
 	ex.ID = index;
@@ -241,41 +236,65 @@ void addObj(meshType t, char* path, bool one_txt, bool isLightSource, vec3 coord
 	glm_vec3_zero(ex.velocity);
 	glm_vec3_zero(ex.futureVel);
 
+	int meshIdx = addMesh(t, path);
+	ex.meshIdx = meshIdx;
+
 	world.objList[world.objCount - 1] = ex;	//(Object){.type = t, .one_txture = one_txt, .coordinates = coords, .scale_dim = scale};
+	printf("Added object id: %d\n", world.objCount - 1);
+	return world.objCount - 1;
 }
 
-void addMesh(meshType type, char* path) {
+//returns mesh index
+int addMesh(meshType type, char* path) {
+	if (path != NULL) {
+		for (int i = 0; i < world.meshCount; i++) {
+			if (strcmp(path, world.meshList[i].PATH) == 0) {	//match path name so we say the are the same mesh
+				// it's a dup just return it's index saying we "added it"
+				return i;
+			}
+		}
+	}
 	int meshIdx = world.meshCount;
 	world.meshCount++;
-	if (world.MeshMax <= world.meshCount) {
-		world.MeshMax *= 2;
-		world.meshList = (Mesh*) realloc(world.meshList, sizeof(Object) * world.MeshMax);
+	if (world.meshMax <= world.meshCount) {
+		world.meshMax *= 2;
+		world.meshList = (Mesh*) realloc(world.meshList, sizeof(Mesh) * world.meshMax);
+	}
+
+	if (path != NULL) {
+		strncpy(world.meshList[meshIdx].PATH, path, sizeof(world.meshList[meshIdx].PATH));	// limit is 4096
+	} else {
+		memset(world.meshList[meshIdx].PATH, 0, sizeof(world.meshList[meshIdx].PATH));
 	}
 
 	float* data;
 	unsigned int data_len;
 	int* indices;
 	unsigned int indices_len;
-	readObjFile(p, sizeof(p), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
-
-	switch type {
-		case meshType_cube:
-			setupMesh(&(world.meshList[meshIdx]), vertices, sizeof(vertices), NULL, 0);
+	//readObjFile(path, sizeof(path), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
+	printf("hello guys why tf can't we do anything right??\n");
+	switch (type) {
+		case meshType_cube_simple:
+			printf("hello guys why tf can't we do anything right?? x3\n");
+			setupSimpleMesh(&(world.meshList[meshIdx]), vertices, sizeof(vertices), NULL, 0);
 			break;
 		case meshType_cube_light:
-			setupMesh(&(world.meshList[meshIdx]), vertices, sizeof(vertices), NULL, 0);
+			setupSimpleMesh(&(world.meshList[meshIdx]), vertices, sizeof(vertices), NULL, 0);
 			break;
 		case meshType_OBJ_simple:
-			readObjFile(path, sizeof(path), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
-			setupSimpleMesh(&(world.meshList[meshIdx]), &data, data_len, &indices, indices_len);
+			readObjFile(path, strlen(path), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
+			setupMesh(&(world.meshList[meshIdx]), &data, data_len, &indices, indices_len);
 			break;
 		case meshType_OBJ_light:
-			readObjFile(path, sizeof(path), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
-			setupSimpleMesh(&(world.meshList[meshIdx]), &data, data_len, &indices, indices_len);
+			readObjFile(path, strlen(path), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
+			setupMesh(&(world.meshList[meshIdx]), &data, data_len, &indices, indices_len);
 			break;
-		case default:
+		default:
+			printf("lol should not be here\n");
 			break;
 	}
+	printf("hello guys why tf can't we do anything right?? x44\n");
+	return meshIdx;
 }
 
 void updateObjPos(Object* obj, float dt, float float_tick) {	//to fix velocity post loop desync we need to have list of obj player got it's vel from then update it when it changes
@@ -324,15 +343,15 @@ void updateObjVelFuncVertical(float float_tick, float offset, float r, vec3 ret)
 
 
 void checkObjList(Player *plyr) {
-	plyr->objCollisionList = (bool*) realloc(plyr->objCollisionList, sizeof(bool) * world.listMax);
-	for (int i = 0; i < world.listMax; i++) {
+	plyr->objCollisionList = (bool*) realloc(plyr->objCollisionList, sizeof(bool) * world.objMax);
+	for (int i = 0; i < world.objMax; i++) {
 		plyr->objCollisionList[i] = false;
 	}
 }
 
 void updateVelAdded(Player *plyr) {
 	glm_vec3_zero(plyr->velAdded);
-	for (int i = 0; i < world.listMax; i++) {
+	for (int i = 0; i < world.objMax; i++) {
 		if (plyr->objCollisionList[i] == true) {
 			glm_vec3_add(plyr->velAdded, world.objList[i].velocity, plyr->velAdded);
 		}

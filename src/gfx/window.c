@@ -428,7 +428,7 @@ void window_loop() {
 			//printf("%f, %f, %f\n", world.objList[i].coordinates[0], world.objList[i].coordinates[1], world.objList[i].coordinates[2]);
 			
 			if (world.objList[i].lightSrc == false) {
-				if (world.objList[i].type == meshType_OBJ) {
+				if (world.objList[i].type > 6) {	// joke is no type is >6. Temp disabling this
 					glUseProgram(programIDSimple);
 					glEnable(GL_DEPTH_TEST);
 					unsigned int TviewLoc  = glGetUniformLocation(programIDSimple, "view");
@@ -436,7 +436,7 @@ void window_loop() {
 					glUniformMatrix4fv(TviewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
 					glUniformMatrix4fv(TprojLoc, 1, GL_FALSE, (float*)projection);
 					//ALTdrawObject(world.objList[i], programIDSimple);
-					drawObjectSimple(world.objList[i], programIDSimple);
+					drawObjectSimple(world.objList[i], world.meshList, programIDSimple);
 				} else {
 					int count = 0;
 					Object *closest_src_list = findClosestLightSrc(world.objList[i], &count);	//self doesn't matter since we know not light source
@@ -446,7 +446,7 @@ void window_loop() {
 					unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
 					glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
 					glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
-					drawObject(world.objList[i], programIDMain, closest_src_list, count, player.camera);
+					drawObject(world.objList[i], world.meshList, programIDMain, closest_src_list, count, player.camera);
 					//printf("hy\n");
 					free(closest_src_list);
 				}
@@ -457,7 +457,7 @@ void window_loop() {
 				unsigned int TprojLoc  = glGetUniformLocation(programIDLight, "projection");
 				glUniformMatrix4fv(TviewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
 				glUniformMatrix4fv(TprojLoc, 1, GL_FALSE, (float*)projection);
-				drawObjectLight(world.objList[i], programIDLight);
+				drawObjectLight(world.objList[i], world.meshList, programIDLight);
 		    }
 		}
 		glDisable(GL_DEPTH_TEST);

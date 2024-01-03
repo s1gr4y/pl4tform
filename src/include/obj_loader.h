@@ -1,6 +1,8 @@
 #ifndef OBJ_LOADER_H
 #define OBJ_LOADER_H
 
+#include "../../Dependencies/cglm/cglm.h"
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>

@@ -34,6 +34,7 @@ typedef struct Mesh {
 	float *vertices;
 	int *indices;
 	unsigned int indexSize;
+	char PATH[4096];	// path to file, typically linux has it at 4096 bytes
 	//struct Texture *textures;
 } Mesh;
 
@@ -61,14 +62,14 @@ typedef struct Object {	//needs orientation (vec3 rotation and axis)
 } Object;
 
 void initRender();
-void addMesh(meshType type, char* path);
-void setupMesh(struct Mesh *mesh, float *vertices, unsigned int vertSize, int *indices, unsigned int indexSize);
-void setupSimpleMesh(struct Mesh *mesh, float **verts, unsigned int vertSize, int **indices, unsigned int indexSize);
+int addMesh(meshType type, char* path);
+void setupMesh(struct Mesh *mesh, float **vertices, unsigned int vertSize, int **indices, unsigned int indexSize);
+void setupSimpleMesh(struct Mesh *mesh, float *verts, unsigned int vertSize, int *indices, unsigned int indexSize);
 void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_name);
 void generateVAO_VBO_text();
-void drawObject(struct Object obj, unsigned int pID, Object* lightObjs, int count, Camera camera);
-void drawObjectLight(struct Object obj, unsigned int pID);
-void drawObjectSimple(struct Object obj, unsigned int pID);
+void drawObject(struct Object obj, struct Mesh* mList, unsigned int pID, Object* lightObjs, int count, Camera camera);
+void drawObjectLight(struct Object obj, struct Mesh* mList, unsigned int pID);
+void drawObjectSimple(struct Object obj, struct Mesh* mList, unsigned int pID);
 
 void ALTdrawObject(struct Object obj, unsigned int pID);
 
