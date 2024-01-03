@@ -51,13 +51,6 @@ void setupSimpleMesh(struct Mesh *mesh, float *verts, unsigned int vertSize, int
 	//glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(trigColors), trigColors, GL_STATIC_DRAW);
 
-	// 3. copy our index array in a element buffer for OpenGL to use
-	///*
-	if (mesh->indices != NULL) {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize*sizeof(int), mesh->indices, GL_STATIC_DRAW);
-	}
-
 	//*/
 
 	// 4. then set the vertex attributes pointers
@@ -69,11 +62,18 @@ void setupSimpleMesh(struct Mesh *mesh, float *verts, unsigned int vertSize, int
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 	//*/
+	// load and create a texture
+	// -------------------------
+	//stbi_set_flip_vertically_on_load(true);
+	//glEnable(GL_TEXTURE_2D);
+	// should pass in path to texture for given object but we will worry about that later
+	generateTexture(mesh, 0, "Resources/Textures/container.jpg");	//need to figure out why texture no work T_T; 6/17 (fixed a while ago (and forgot) but was an annoying bug, keeping comment)
+	generateTexture(mesh, 1, "Resources/Textures/crate.png");
+	generateTexture(mesh, 2, "Resources/Textures/dev_64.png");
 	glBindVertexArray(0);
 }
 
 void setupMesh(struct Mesh *mesh, float **vertices, unsigned int vertSize, int **indices, unsigned int indexSize) {
-	printf("hello guys why tf can't we do anything right?? x42069\n");
 	//unsigned int VBO, VAO, EBO;
 	glGenVertexArrays(1, &mesh->VAO);
 	glGenBuffers(1, &mesh->VBO);
@@ -93,8 +93,6 @@ void setupMesh(struct Mesh *mesh, float **vertices, unsigned int vertSize, int *
 		mesh->indices = NULL;
 	}
 	mesh->indexSize = indexSize;
-
-	printf("hello guys why tf can't we do anything right?? brug\n");
 	//for (int i = 0; i < vertSize)
 
 	// 2. copy our vertices array in a vertex buffer for OpenGL to use
@@ -116,12 +114,21 @@ void setupMesh(struct Mesh *mesh, float **vertices, unsigned int vertSize, int *
 
 	// 4. then set the vertex attributes pointers
 	///*
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
+	if (mesh->indexSize > 0) {
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		//glEnableVertexAttribArray(2);
+	} else {
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+	}
 	//*/
 
 	// load and create a texture
@@ -282,7 +289,9 @@ void drawObject(struct Object obj, struct Mesh* mList, unsigned int pID, Object*
 		unsigned int colorLoc = glGetUniformLocation(pID, "color");
 		glUniform3fv(colorLoc, 1, (float*)color);
 	} else {
+		glUniform1i(glGetUniformLocation(pID, "using_color"), 0);	// set to 0, not using color
 		if (obj.one_txture == true) {
+			//printf("setting to dev texture\n");
 			glUniform1i(glGetUniformLocation(pID, "material.texture1"), 2);
 			glUniform1i(glGetUniformLocation(pID, "material.texture2"), 2);
 			glUniform1f(glGetUniformLocation(pID, "mixer"), 1.0f);
@@ -314,11 +323,11 @@ void drawObject(struct Object obj, struct Mesh* mList, unsigned int pID, Object*
 	unsigned int modelLoc = glGetUniformLocation(pID, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)model);
 	if (mesh.indexSize <= 0) {
-		printf("obj id %d\n", obj.ID);
+		//printf("obj id %d\n", obj.ID);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	} else {
 		glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
-		printf("%d\n", mesh.indexSize);
+		//printf("%d\n", mesh.indexSize);
 	}
 	//glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);

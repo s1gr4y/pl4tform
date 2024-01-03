@@ -207,7 +207,7 @@ void initWorld() {
 	//world.objList[8].lightSrc = false;
 
 	//extra
-	addObj(meshType_OBJ_light, "Resources/Models/teapot.obj", true, false, (vec3){0.0f, 2.3f, 7.0f}, (vec3){0.5f, 0.5f, 0.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 9, NULL);
+	addObj(meshType_OBJ_light, "Resources/Models/teapot.obj", true, false, (vec3){0.0f, 0.4f, 7.0f}, (vec3){0.35f, 0.35f, 0.35f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 9, NULL);
 	world.objList[9].hasCollision = false;
 	
 	checkObjList(&player);
@@ -272,10 +272,8 @@ int addMesh(meshType type, char* path) {
 	int* indices;
 	unsigned int indices_len;
 	//readObjFile(path, sizeof(path), &data, (unsigned int*)&data_len, &indices, (unsigned int*)&indices_len);
-	printf("hello guys why tf can't we do anything right??\n");
 	switch (type) {
 		case meshType_cube_simple:
-			printf("hello guys why tf can't we do anything right?? x3\n");
 			setupSimpleMesh(&(world.meshList[meshIdx]), vertices, sizeof(vertices), NULL, 0);
 			break;
 		case meshType_cube_light:
@@ -293,7 +291,6 @@ int addMesh(meshType type, char* path) {
 			printf("lol should not be here\n");
 			break;
 	}
-	printf("hello guys why tf can't we do anything right?? x44\n");
 	return meshIdx;
 }
 

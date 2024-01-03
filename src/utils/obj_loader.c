@@ -33,8 +33,7 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
 
     // first pass to simply check how many vertices, faces, textures, etc for mem alloc.
     while (fgets(fReader.buff, sizeof(fReader.buff)-1, fReader.f_ptr) != NULL) {
-        printf("we hot??\n");
-        printf("Read in %255s", fReader.buff);
+        //printf("Read in %255s", fReader.buff);
         ///*
         if (fReader.buff[strlen(fReader.buff) - 1] != '\n') {   // then buffer not big enough for the line
             printf("should not be longer than 254, returning.\n");
@@ -58,7 +57,7 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
                 int counter = 0;
                 int number_of_verts = 0;
                 for (int k = 0; k < strlen(fReader.buff); k++) {
-                    printf("here at fReader.buff[%d] = %d\n", k, (int)fReader.buff[k]);
+                    //printf("here at fReader.buff[%d] = %d\n", k, (int)fReader.buff[k]);
                     if (fReader.buff[k] == ' ') {
                         counter += 1;
                     }
@@ -67,29 +66,25 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
                         counter = 0;
                     }
                 }
-                printf("done\n");
                 if (number_of_verts > 4) {
                     printf("ERROR, can't support faces with more than 4 vertices!");
                     exit(1);
                     break;
                 } else if (number_of_verts == 4) {
-                    printf("why tf we here\n");
                     face_count += 2;    // add an extra face to triangulate
                 } else {    // 3 verts, (normal)
-                    printf("done2\n");
                     face_count++;
                 }
             }   //otherwise ignore
         }
         //*/
-        printf("done3??\n");
     }
 
-    printf("here2!!!!!!!!!?");
+    //printf("here2!!!!!!!!!?");
     //exit(1);
     //fclose(fReader.f_ptr);
 
-    bool hasNormals = true; // we will say it does for fun
+    bool hasNormals = false;
     // to parse with this format use below
     //sscanf(string, "%s %d %*[^0-9] %d %d %*[^0-9] %d %d %*[^0-9] %d %d %*[^0-9] %d", tmp, &(arr[i+0]), &(arr[i+1]), &(arr[i+2]), &(arr[i+3]), &(arr[i+4]), &(arr[i+5]), &(arr[i+6]), &(arr[i+7]));
     if (vertex_normal_count > 0) {  // we need to at least parse faces with "#//# #//# #//#" notation
@@ -103,6 +98,7 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
     if (hasNormals) {
         increment = 6;
     }
+    increment = 6; // say 6 anyway for fun
 
     unsigned int vertex_index = 0;
     unsigned int vertex_normal_index = 0;
@@ -126,15 +122,15 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
 
     memset(*indices, 0, sizeof(int) * face_count * 3);
     memset(*data, 0, sizeof(float) * vertex_count * increment);
-    printf("we have %d space for data\n", vertex_count * increment);
-    printf("we have %d space for faces\n", face_count * 3);
+    //printf("we have %d space for data\n", vertex_count * increment);
+    //printf("we have %d space for faces\n", face_count * 3);
     //exit(1);
 
     // 2nd pass to actually set the data merge, free, pass data to mesh type, then free again.
     char tmp[10];
     fReader.f_ptr = fopen(path, "r");
     while (fgets(fReader.buff, sizeof(fReader.buff)-1, fReader.f_ptr) != NULL) {
-        printf("Read in %254s\n", fReader.buff);
+        //printf("Read in %254s\n", fReader.buff);
         if (fReader.buff[strlen(fReader.buff) - 1] != '\n') {   // then buffer not big enough for the line
             printf("should not be longer than 255, returning.\n");
             break;
@@ -148,7 +144,7 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
                 sscanf((fReader.buff), "%2s %f %f", tmp, &(vertex_textures[vertex_texture_index+0]), &(vertex_textures[vertex_texture_index+1]));
                 vertex_texture_index += 2;
             } else { //vertex
-                sscanf((fReader.buff), "%2s %f %f %f", tmp, &(vertices[vertex_index+0]), &(vertices[vertex_index+1]), &(vertices[vertex_index+2]));
+                sscanf((fReader.buff), "%1s %f %f %f", tmp, &(vertices[vertex_index+0]), &(vertices[vertex_index+1]), &(vertices[vertex_index+2]));
                 //printf("\n%s", fReader.buff);
                 //printf("vertices[%d+0] = %f\n", vertex_index, vertices[vertex_index+0]);
                 vertex_index += 3;
@@ -157,7 +153,7 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
             int counter = 0;
             int number_of_verts = 0;
             for (int k = 0; k < strlen(fReader.buff); k++) {
-                printf("here at fReader.buff[%d] = %d\n", k, (int)fReader.buff[k]);
+                //printf("here at fReader.buff[%d] = %d\n", k, (int)fReader.buff[k]);
                 if (fReader.buff[k] == ' ') {
                     counter += 1;
                 }
@@ -171,29 +167,29 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
                 break;
             } else if (number_of_verts == 4) {
                 if (!hasNormals) {
-                    sscanf((fReader.buff), "%2s %d %d %d %*s", tmp, &(faces[face_index+0]), &(faces[face_index+1]), &(faces[face_index+2]));
+                    sscanf((fReader.buff), "%1s %d %d %d %*s", tmp, &(faces[face_index+0]), &(faces[face_index+1]), &(faces[face_index+2]));
                     face_index += 3;
-                    sscanf((fReader.buff), "%2s %d %*s %d %d", tmp, &(faces[face_index+0]), &(faces[face_index+1]), &(faces[face_index+2]));
+                    sscanf((fReader.buff), "%1s %d %*s %d %d", tmp, &(faces[face_index+0]), &(faces[face_index+1]), &(faces[face_index+2]));
                 } else {
-                    sscanf(fReader.buff, "%2s %d %*[^0-9] %d %d %*[^0-9] %d %d %*[^0-9] %d %*s", tmp, &(faces[face_index+0]), &(face_normals[face_normal_index+0]), 
+                    sscanf(fReader.buff, "%1s %d %*[^0-9] %d %d %*[^0-9] %d %d %*[^0-9] %d %*s", tmp, &(faces[face_index+0]), &(face_normals[face_normal_index+0]), 
                     &(faces[face_index+1]), &(face_normals[face_normal_index+1]), &(faces[face_index+2]), &(face_normals[face_normal_index+2]));
                     face_index += 3;
                     face_normal_index += 3;
-                    sscanf(fReader.buff, "%2s %d %*[^0-9] %d %*s %d %*[^0-9] %d %d %*[^0-9] %d", tmp, &(faces[face_index+0]), &(face_normals[face_normal_index+0]), 
+                    sscanf(fReader.buff, "%1s %d %*[^0-9] %d %*s %d %*[^0-9] %d %d %*[^0-9] %d", tmp, &(faces[face_index+0]), &(face_normals[face_normal_index+0]), 
                     &(faces[face_index+1]), &(face_normals[face_normal_index+1]), &(faces[face_index+2]), &(face_normals[face_normal_index+2]));
                 }
             } else {    // 3 verts, (normal)
                 if (!hasNormals) {
-                    sscanf((fReader.buff), "%s %d %d %d", tmp, &(faces[face_index+0]), &(faces[face_index+1]), &(faces[face_index+2]));
+                    sscanf((fReader.buff), "%1s %d %d %d", tmp, &(faces[face_index+0]), &(faces[face_index+1]), &(faces[face_index+2]));
                 } else {
-                    sscanf(fReader.buff, "%s %d %*[^0-9] %d %d %*[^0-9] %d %d %*[^0-9] %d", tmp, &(faces[face_index+0]), &(face_normals[face_normal_index+0]), 
+                    sscanf(fReader.buff, "%1s %d %*[^0-9] %d %d %*[^0-9] %d %d %*[^0-9] %d", tmp, &(faces[face_index+0]), &(face_normals[face_normal_index+0]), 
                     &(faces[face_index+1]), &(face_normals[face_normal_index+1]), &(faces[face_index+2]), &(face_normals[face_normal_index+2]));
                 }
             }
             //printf("\n%s", fReader.buff);
             //printf("faces[%d+0] = %d\n", face_index, faces[face_index+0]);
 
-            printf("last indexed values %d %d\n", face_index, face_normal_index);
+            //printf("last indexed values %d %d\n", face_index, face_normal_index);
 
             face_normal_index += 3;
             face_index += 3;
@@ -208,6 +204,7 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
         (*data)[i + 0] = vertices[indexer + 0];
         (*data)[i + 1] = vertices[indexer + 1];
         (*data)[i + 2] = vertices[indexer + 2];
+        //printf("vertex %d, %f %f %f\n", indexer, (*data)[indexer+0], (*data)[indexer+1], (*data)[indexer+2]);
         if (hasNormals) {
             (*data)[i + 3] = vertex_normals[indexer + 0];   // technically we should do vertex_normals[face_normals[i + 0]]
             (*data)[i + 4] = vertex_normals[indexer + 1];   // but since not interating over faces we assume index is the same
@@ -223,7 +220,11 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
     }
     *dataSize = (unsigned)vertex_count*increment;
 
+    printf("here4?\n");
+
     for (unsigned int i = 0; i < face_count*3; i += 3) {    //bc obj starts at 1
+        //printf("face at at %d", faces[i + 2] - 1); 
+        //exit(1);
         (*indices)[i + 0] = faces[i + 0] - 1;
         (*indices)[i + 1] = faces[i + 1] - 1;
         (*indices)[i + 2] = faces[i + 2] - 1;
@@ -232,20 +233,22 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
         if (!hasNormals) {
             //proposed method to calculate vertex normals.
             //facted_normal = normalize( cross( 2-3, 1-3))
+            //printf("grabbing vertex at %d", (faces[i + 2] - 1)*3 + 0); 
+            //printf(" with %f \n", vertices[((faces[i + 2] - 1)*3) + 0]);
             vec3 v3;
-            v3[0] = vertices[((face_normals[i + 2] - 1)*3) + 0];
-            v3[1] = vertices[((face_normals[i + 2] - 1)*3) + 1];
-            v3[2] = vertices[((face_normals[i + 2] - 1)*3) + 2];
+            v3[0] = vertices[((faces[i + 2] - 1)*3) + 0];
+            v3[1] = vertices[((faces[i + 2] - 1)*3) + 1];
+            v3[2] = vertices[((faces[i + 2] - 1)*3) + 2];
 
             vec3 v2;
-            v2[0] = vertices[((face_normals[i + 1] - 1)*3) + 0];
-            v2[1] = vertices[((face_normals[i + 1] - 1)*3) + 1];
-            v2[2] = vertices[((face_normals[i + 1] - 1)*3) + 2];
+            v2[0] = vertices[((faces[i + 1] - 1)*3) + 0];
+            v2[1] = vertices[((faces[i + 1] - 1)*3) + 1];
+            v2[2] = vertices[((faces[i + 1] - 1)*3) + 2];
 
             vec3 v1;
-            v1[0] = vertices[((face_normals[i + 0] - 1)*3) + 0];
-            v1[1] = vertices[((face_normals[i + 0] - 1)*3) + 1];
-            v1[2] = vertices[((face_normals[i + 0] - 1)*3) + 2];
+            v1[0] = vertices[((faces[i + 0] - 1)*3) + 0];
+            v1[1] = vertices[((faces[i + 0] - 1)*3) + 1];
+            v1[2] = vertices[((faces[i + 0] - 1)*3) + 2];
 
             vec3 res1;
             glm_vec3_sub(v2, v3, res1);
@@ -253,14 +256,29 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
             glm_vec3_sub(v1, v3, res2);
             vec3 res3;
             glm_vec3_crossn(res1, res2, res3); // res3 is our vertex normal
-            (*data)[i + 3] += res3[0];
-            (*data)[i + 4] += res3[1];
-            (*data)[i + 5] += res3[2];
+            //printf("moding data at %d\n", (faces[i + 0] - 1)*3 + 3);
+            ///*
+            //logic: "faces[i+#]-1" gets the vertex in the array
+            //we then multiply by 3*2 since we have 6 floats (3 for verts, 3 for normals)
+            //then we update the 3 verts shared by triangle. 
+            (*data)[(faces[i + 0] - 1)*(3*2) + 3] += res3[0];
+            (*data)[(faces[i + 0] - 1)*(3*2) + 4] += res3[1];
+            (*data)[(faces[i + 0] - 1)*(3*2) + 5] += res3[2];
+
+            (*data)[(faces[i + 1] - 1)*(3*2) + 3] += res3[0];
+            (*data)[(faces[i + 1] - 1)*(3*2) + 4] += res3[1];
+            (*data)[(faces[i + 1] - 1)*(3*2) + 5] += res3[2];
+
+            (*data)[(faces[i + 2] - 1)*(3*2) + 3] += res3[0];
+            (*data)[(faces[i + 2] - 1)*(3*2) + 4] += res3[1];
+            (*data)[(faces[i + 2] - 1)*(3*2) + 5] += res3[2];
+            //*/
         } else {
-            (*data)[i + 3] = vertex_normals[i + 0];
-            (*data)[i + 4] = vertex_normals[i + 1];
-            (*data)[i + 5] = vertex_normals[i + 2];
+            (*data)[(faces[i]-1) + 3] = vertex_normals[i + 0];
+            (*data)[(faces[i]-1) + 4] = vertex_normals[i + 1];
+            (*data)[(faces[i]-1) + 5] = vertex_normals[i + 2];
         }
+        //printf("vertex at %d == %f %f %f\n", i, (*data)[i+0], (*data)[i+1], (*data)[i+2]);
     }
     *indexSize = (unsigned)face_count*3;
 
@@ -273,14 +291,16 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
         (*data)[i + 3] = normalized[0];
         (*data)[i + 4] = normalized[1];
         (*data)[i + 5] = normalized[2];
+        //printf("vertex %d, %f %f %f\n", i, (*data)[i+0], (*data)[i+1], (*data)[i+2]);
+        //printf("vertex normal %d, %f %f %f\n", i, (*data)[i+3], (*data)[i+4], (*data)[i+5]);
     }
 
     //*/
 
-    //free(vertices);
-    //free(vertex_textures);
-    //free(vertex_normals);
-    //free(faces);
+    free(vertices);
+    free(vertex_textures);
+    free(vertex_normals);
+    free(faces);
 
     fclose(fReader.f_ptr);
     printf("edn\n");
