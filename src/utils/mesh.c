@@ -64,7 +64,7 @@ void setupSimpleMesh(struct Mesh *mesh, float *verts, unsigned int vertSize, int
 	//*/
 	// load and create a texture
 	// -------------------------
-	//stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(true);
 	//glEnable(GL_TEXTURE_2D);
 	// should pass in path to texture for given object but we will worry about that later
 	generateTexture(mesh, 0, "Resources/Textures/container.jpg");	//need to figure out why texture no work T_T; 6/17 (fixed a while ago (and forgot) but was an annoying bug, keeping comment)
@@ -214,6 +214,10 @@ void generateTexture(struct Mesh *mesh, unsigned int txtIndex, const char* file_
 
 void drawObject(struct Object obj, struct Mesh* mList, unsigned int pID, Object* lightObjs, int count, Camera camera) {	//debateable if needs to pass in by pointer not copy, but doesn't matter
 	// draw model
+	glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
+
 	Mesh mesh = mList[obj.meshIdx];
 	mat4 model;
 	mat4 tmpMatNorm;
@@ -304,20 +308,11 @@ void drawObject(struct Object obj, struct Mesh* mList, unsigned int pID, Object*
 	
 	unsigned int matrixNormalLoc = glGetUniformLocation(pID, "matrixNormal");
 	
-	//glm_mat4_copy(model, tmpMatNorm);
-	glm_mat4_pick3(model, matrixNormal);
-	//glm_mat4_inv(model, tmpMatNorm);			//not sure if inverse and transpose are necessary but will keep copy
-	//glm_mat4_transpose_to(tmpMatNorm, tmpMatNorm);
-	/*
-	int j = -1;
-	for (int i = 0; i < 9; i++) {	// loop to convert column dominant mat4 to mat3
-		if (i % 3 == 0) {
-			j += 1;
-		}
-		matrixNormal[j][i%3] = tmpMatNorm[j][i%3];
-	}
-	*/
-	//glm_mat3_copy((float (*)[3])tmpMatNorm, matrixNormal);	// copy the first 3 rows and cols from 4x4 mat to get scalar part along diaganal and not transform
+	glm_mat4_copy(model, tmpMatNorm);
+	glm_mat4_inv(tmpMatNorm, tmpMatNorm);			//not sure if inverse and transpose are necessary but will keep copy
+	glm_mat4_transpose_to(tmpMatNorm, tmpMatNorm);
+	
+	glm_mat4_pick3(tmpMatNorm, matrixNormal);
 	glUniformMatrix3fv(matrixNormalLoc, 1, GL_FALSE, (float*)matrixNormal);
 	
 	unsigned int modelLoc = glGetUniformLocation(pID, "model");
@@ -329,7 +324,6 @@ void drawObject(struct Object obj, struct Mesh* mList, unsigned int pID, Object*
 		glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
 		//printf("%d\n", mesh.indexSize);
 	}
-	//glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 

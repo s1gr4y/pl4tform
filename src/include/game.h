@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "../include/gridmap.h"
 #include "../include/mesh.h"
 #include "../include/player.h"
 #include "../include/physics.h"
@@ -9,6 +10,8 @@ typedef struct World_State {
 	struct Object* objList;
 	unsigned int objCount;
 	unsigned int objMax;
+
+	GridMap gridMap;
 
 	struct Mesh* meshList;
 	unsigned int meshCount;

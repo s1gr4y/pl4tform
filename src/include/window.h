@@ -41,11 +41,14 @@ struct Window {
 
 	int current_display_fps;
 	int fps;
+    bool inFocus;
+    bool ESC_held;
 	
     double curr_time;
     double prev_time;
-    double dt;							//delta time
-    double time_passed;					//how long program has been running
+    double dt;							    //delta time
+    double time_passed;					    //how long program has been running
+
     struct Keyboard keyboard;
 };
 

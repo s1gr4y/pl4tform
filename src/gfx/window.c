@@ -16,7 +16,8 @@ int Window_init(int wid, int high, char* title) {
 	window.tick = 0;
 	window.lastX = wid/2;
 	window.lastY = high/2;
-	//firstMouse = 1;
+	window.inFocus = true;
+	window.ESC_held = false;
 	for (int i = 0; i < GLFW_KEY_LAST; i++) {
 		window.keyboard.keys[i] = 0;
 	}
@@ -118,8 +119,23 @@ void action_callback() {
 	float maxSpeed = CAM_SPEED * 2.5;
 	// if key is pressed down do stuff.
 	if (window.keyboard.keys[GLFW_KEY_ESCAPE]) {
-		glfwSetWindowShouldClose(window.handle, GLFW_TRUE);
+		//glfwSetWindowShouldClose(window.handle, GLFW_TRUE);
+		if (window.ESC_held == false) {	// first time pressing ESC so we will wait a tick and if still pressing after 
+			window.ESC_held = true;
+			if (window.inFocus) {
+				glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				glfwSetCursorPosCallback(window.handle, NULL);
+				window.inFocus = false;
+			} else {
+				glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				glfwSetCursorPosCallback(window.handle, mouse_callback);
+				window.inFocus = true;
+			}
+		}
+	} else {
+		window.ESC_held = false;
 	}
+
 	if (window.keyboard.keys[GLFW_KEY_W]) {
 		vec3 temp;
 		glm_vec3_zero(temp);
