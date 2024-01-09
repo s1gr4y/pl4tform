@@ -3,25 +3,22 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../Dependencies/stb_image.h"
 
-void initRender() {	//may not need anymore
-	//glActiveTexture(GL_TEXTURE0 + 1); //say we have 16 txtures.
-	/*
-	
-	//setupMesh(&(meshList[2]), vertices, sizeof(vertices), NULL, 0);
-	glGenVertexArrays(1, &(meshList[2].VAO));
-	glGenVertexArrays(1, &(meshList[2].VBO));
-	glBindVertexArray((meshList[2].VAO));
-	glBindBuffer(GL_ARRAY_BUFFER, meshList[2].VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glBindVertexArray(0);
-	*/
+const unsigned int SHADOW_WIDTH = 1920;
+const unsigned int SHADOW_HEIGHT = 1080;
 
-	//setupSimpleMesh(&(meshList[3]), &data, data_len, &indices, indices_len);
-	//setupSimpleMesh(&(meshList[3]), square_vertices, sizeof(square_vertices), square_posIndices, sizeof(square_posIndices));
-	//setupSimpleMesh(&(meshList[3]), square_vertices, sizeof(square_vertices), square_posIndices, sizeof(square_posIndices));
-}
+unsigned int depthMapFBO;	//universal for the "sun"
+unsigned int depthMap;
+
+unsigned int quadVAO;
+unsigned int quadVBO;
+
+float quadVertices[] = {
+    // positions        // texture Coords
+    -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+     1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+     1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+};
 
 void setupSimpleMesh(struct Mesh *mesh, float *verts, unsigned int vertSize, int *indices, unsigned int indexSize) {
 	//unsigned int VBO, VAO, EBO;
@@ -114,12 +111,12 @@ void setupMesh(struct Mesh *mesh, float **vertices, unsigned int vertSize, int *
 
 	// 4. then set the vertex attributes pointers
 	///*
-	if (mesh->indexSize > 0) {
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	if (mesh->indexSize > 0) {	// may not need this anymore
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
-		//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 		//glEnableVertexAttribArray(2);
 	} else {
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -222,10 +219,32 @@ void drawObject(struct Object obj, struct Mesh* mList, unsigned int pID, Object*
 	mat4 model;
 	mat4 tmpMatNorm;
 	mat3 matrixNormal;
-	for (int i = 0; i < 3; i++) {
+	int i = 0;
+	for (i = 0; i < 3; i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, mesh.textures[i]);
 	}
+	//printf("i %d\n", i);
+	// following 2 lines not needed
+	glActiveTexture(GL_TEXTURE0 + i);
+	glBindTexture(GL_TEXTURE_2D, depthMap);	// shadow map for the sun
+
+	// this was the line of code not letting it work
+	glUniform1i(glGetUniformLocation(pID, "shadowMap"), i);
+
+	float near_plane = 1.0f, far_plane = 7.5f;
+    mat4 lightProjection;
+    glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane, lightProjection);
+    mat4 lightView;
+    glm_lookat(  lightObjs->coordinates, // light position
+                 (vec3){ 0.0f, 0.0f, 0.0f}, 
+                 (vec3){ 0.0f, 1.0f, 0.0f}, lightView);
+    mat4 lightSpaceMatrix;
+    glm_mat4_mul(lightProjection, lightView, lightSpaceMatrix);
+
+    glUniformMatrix4fv(glGetUniformLocation(pID, "lightSpaceMatrix"), 1, GL_FALSE, (float*)(lightSpaceMatrix));
+
+
 	glBindVertexArray(mesh.VAO);
 	glm_mat4_identity(model);
 	glm_translate(model, obj.coordinates);
@@ -333,6 +352,8 @@ void drawObjectSimple(struct Object obj, struct Mesh* mList, unsigned int pID) {
 	mat4 model;
 	vec3 color = GLM_VEC3_ZERO_INIT;
 	color[0] = 0.3f; color[1] = 0.5f; color[0] = 0.7f;
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mList[obj.meshIdx].textures[1]);	// may not need to point to specific one
 	
 	glBindVertexArray(mesh.VAO);
 	glm_mat4_identity(model);
@@ -346,7 +367,13 @@ void drawObjectSimple(struct Object obj, struct Mesh* mList, unsigned int pID) {
 	unsigned int modelLoc = glGetUniformLocation(pID, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)model);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
+	if (mesh.indexSize <= 0) {
+		//printf("obj id %d\n", obj.ID);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	} else {
+		glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
+		//printf("%d\n", mesh.indexSize);
+	}
 	//printf("%d\n", mesh.indexSize);
 	glBindVertexArray(0);
 }
@@ -376,5 +403,99 @@ void drawObjectLight(struct Object obj, struct Mesh* mList, unsigned int pID) {	
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	//glDrawElements(GL_TRIANGLES, mesh.indexSize, GL_UNSIGNED_INT, 0);
 	//glBindVertexArray(0);
+}
+
+
+
+
+void setupQuadVAO_VBO() {
+    // setup plane VAO
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+}
+
+void DrawQuad(unsigned int prgID) {
+	glUseProgram(prgID);
+    glBindVertexArray(quadVAO);
+	float near_plane = 1.0f, far_plane = 7.5f;
+	glUniform1f(glGetUniformLocation(prgID, "near_plane"), near_plane);
+    glUniform1f(glGetUniformLocation(prgID, "far_plane"), far_plane);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+
+	glUniform1i(glGetUniformLocation(prgID, "depthMap"), 0);	//0 since we use first one activated
+
+        float quadVertices[] = {
+            // positions        // texture Coords
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
+void generateDepthFBO() {
+    glGenFramebuffers(1, &depthMapFBO);
+
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void renderDepthMap(Object lightSrc, unsigned int prgID) {
+    glUseProgram(prgID);
+
+    // generating perspective
+    float near_plane = 1.0f, far_plane = 7.5f;
+    mat4 lightProjection;
+    glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane, lightProjection);
+    mat4 lightView;
+    glm_lookat(  lightSrc.coordinates, // light position
+                 (vec3){ 0.0f, 0.0f, 0.0f}, 
+                 (vec3){ 0.0f, 1.0f, 0.0f}, lightView);
+    mat4 lightSpaceMatrix;
+    glm_mat4_mul(lightProjection, lightView, lightSpaceMatrix);
+
+    glUniformMatrix4fv(glGetUniformLocation(prgID, "lightSpaceMatrix"), 1, GL_FALSE, (float*)(lightSpaceMatrix));
+
+    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    // you render all obj here from light pov
+    //RenderScene(programIDDepthShader);    //dne yet
+
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

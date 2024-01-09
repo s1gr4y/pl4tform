@@ -18,6 +18,10 @@ int Window_init(int wid, int high, char* title) {
 	window.lastY = high/2;
 	window.inFocus = true;
 	window.ESC_held = false;
+
+	window.fps_tick_counter = 0;
+	window.frame_counter = 0;
+
 	for (int i = 0; i < GLFW_KEY_LAST; i++) {
 		window.keyboard.keys[i] = 0;
 	}
@@ -59,13 +63,18 @@ int Window_init(int wid, int high, char* title) {
 	get_resolution(&temp_wid, &temp_high);
 	glfwSetWindowPos(window.handle, (temp_wid-window.wid)/2, (temp_high-window.high)/2); //set the window position to mid
 
-	initRender();
 	initWorld();
 	//loadShaders(vertexShaderSource, fragmentShaderSource);
 	loadShaders(vertexShaderSource, fragmentShaderSource, &programIDMain);				//main shader + program
 	loadShaders(vertexShaderSrcTXT, fragmentShaderSrcTXT, &programIDTxt);				//secondary shader + program
 	loadShaders(vertexLightShaderSrc, fragmentLightShaderSrc, &programIDLight);			//light shader + program
 	loadShaders(vertexShaderSrc_Minimal, fragmentShaderSrc_Minimal, &programIDSimple);	//simple shader + program
+	loadShaders(vertexShaderSrc_Depth, fragmentShaderSrc_Depth, &programIDDepthShader);	//depth shader + program
+	loadShaders(vertexShaderSrc_DepthQuad, fragmentShaderSrc_DepthQuad, &programIDDepthQuadShader);
+
+	// set up shadows
+	setupQuadVAO_VBO();
+	generateDepthFBO();
 	
 	glUseProgram(programIDMain);
 	//glUseProgram(programIDTxt);
@@ -320,13 +329,6 @@ void window_loop() {
 	window.dt = 0.0;							//delta time
 	window.time_passed = 0.0;					//how long program has been running
 	
-
-	mat4 projection;
-	glm_mat4_identity(projection);
-	glm_perspective(glm_rad(90.0f), (float)window.wid / (float)window.high, 0.1f, 100.0f, projection);
-	
-	int fps_tick_counter = 0;
-	int frame_counter = 0;
 	
 	while(!glfwWindowShouldClose(window.handle)) {
 		glfwPollEvents();
@@ -359,7 +361,8 @@ void window_loop() {
 	    }
 		*/
 
-	    glClearColor(0.36f, 0.66f, 0.86f, 1.0f);
+	    //glClearColor(0.36f, 0.66f, 0.86f, 1.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//draw all after this
 		
@@ -432,79 +435,116 @@ void window_loop() {
 			updateObjVel(&world.objList[i], window.dt, window.tick_float);
 			updateObjPos(&world.objList[i], window.dt, window.tick_float);
 		}
-		
-		//glEnable(GL_DEPTH_TEST);
-		//unsigned int viewLoc  = glGetUniformLocation(programIDMain, "view");
-		//unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
-		//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
-		//glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
-		//currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
+	
+		//to change texture
+		//glUseProgram(programIDMain);
+		//glUniform1i(glGetUniformLocation(programIDMain, "shadowMap"), 3);
+		drawAllObjects(true);
 
+		drawAllObjects(false);
+
+		//DrawQuad(programIDDepthQuadShader);	// for testing
+
+		//drawFPS(prevTimePassed);
+		
+		//*/
+		
+		//printf("coords: %f, %f, %f\n", player.coords[0], player.coords[1], player.coords[2]);
+		//printf("theta: %f, phi %f\n", player.camera.theta, player.camera.phi);
+		glfwSwapBuffers(window.handle);
+	}
+
+	//glfwDestroyWindow(window.handle);
+	glfwTerminate();
+}
+
+
+void drawAllObjects(bool shadowMode) {	// we can worry about breaking this up later
+	//glEnable(GL_DEPTH_TEST);
+	//unsigned int viewLoc  = glGetUniformLocation(programIDMain, "view");
+	//unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
+	//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
+	//glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
+	//currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
+	mat4 projection;
+	glm_mat4_identity(projection);
+	glm_perspective(glm_rad(90.0f), (float)window.wid / (float)window.high, 0.1f, 100.0f, projection);
+
+	if (shadowMode) {
+		// we should switch to a seprate list of light objects and another for normal objects but fine O(n^2) for now
+		glUseProgram(programIDDepthShader);
 		for (unsigned int i = 0; i < world.objCount; i++) {
-			//printf("%f, %f, %f\n", world.objList[i].coordinates[0], world.objList[i].coordinates[1], world.objList[i].coordinates[2]);
-			
-			if (world.objList[i].lightSrc == false) {
-				if (world.objList[i].type > 6) {	// joke is no type is >6. Temp disabling this
-					glUseProgram(programIDSimple);
-					glEnable(GL_DEPTH_TEST);
-					unsigned int TviewLoc  = glGetUniformLocation(programIDSimple, "view");
-					unsigned int TprojLoc  = glGetUniformLocation(programIDSimple, "projection");
-					glUniformMatrix4fv(TviewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
-					glUniformMatrix4fv(TprojLoc, 1, GL_FALSE, (float*)projection);
-					//ALTdrawObject(world.objList[i], programIDSimple);
-					drawObjectSimple(world.objList[i], world.meshList, programIDSimple);
-				} else {
-					int count = 0;
-					Object *closest_src_list = findClosestLightSrc(world.objList[i], &count);	//self doesn't matter since we know not light source
-					glUseProgram(programIDMain);
-					glEnable(GL_DEPTH_TEST);
-					unsigned int viewLoc  = glGetUniformLocation(programIDMain, "view");
-					unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
-					glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
-					glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
-					drawObject(world.objList[i], world.meshList, programIDMain, closest_src_list, count, player.camera);
-					//printf("hy\n");
-					free(closest_src_list);
+			if (world.objList[i].lightSrc == true) {
+				renderDepthMap(world.objList[i], programIDDepthShader);
+				for (unsigned int i = 0; i < world.objCount; i++) {
+					if (world.objList[i].lightSrc == false) {
+						drawObjectSimple(world.objList[i], world.meshList, programIDDepthShader);
+						//Camera tmp;
+						//glm_vec3_copy(world.objList[i].coordinates, tmp.cameraPos);
+						//glm_vec3_copy((vec3){0.0f, 0.0f, 1.0f}, tmp->cameraFront);
+						//drawObject(world.objList[i], world.meshList, programIDSimple, NULL, 0, player.camera);
+					}
 				}
-		    } else {
-				glUseProgram(programIDLight);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				// reset viewport
+        		glViewport(0, 0, window.wid, window.high);
+        		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			}
+		}
+		return;	// kill early since this is first pass
+	}
+
+	for (unsigned int i = 0; i < world.objCount; i++) {
+		//printf("%f, %f, %f\n", world.objList[i].coordinates[0], world.objList[i].coordinates[1], world.objList[i].coordinates[2]);
+		if (world.objList[i].lightSrc == false) {
+			if (world.objList[i].type > 6) {	// joke is no type is >6. Temp disabling this
+				glUseProgram(programIDSimple);
 				glEnable(GL_DEPTH_TEST);
-				unsigned int TviewLoc  = glGetUniformLocation(programIDLight, "view");
-				unsigned int TprojLoc  = glGetUniformLocation(programIDLight, "projection");
+				unsigned int TviewLoc  = glGetUniformLocation(programIDSimple, "view");
+				unsigned int TprojLoc  = glGetUniformLocation(programIDSimple, "projection");
 				glUniformMatrix4fv(TviewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
 				glUniformMatrix4fv(TprojLoc, 1, GL_FALSE, (float*)projection);
-				drawObjectLight(world.objList[i], world.meshList, programIDLight);
-		    }
+				//ALTdrawObject(world.objList[i], programIDSimple);
+				drawObjectSimple(world.objList[i], world.meshList, programIDSimple);
+			} else {
+				int count = 0;
+				Object *closest_src_list = findClosestLightSrc(world.objList[i], &count);	//self doesn't matter since we know not light source
+				glUseProgram(programIDMain);
+				glEnable(GL_DEPTH_TEST);
+				unsigned int viewLoc  = glGetUniformLocation(programIDMain, "view");
+				unsigned int projLoc  = glGetUniformLocation(programIDMain, "projection");
+				glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
+				glUniformMatrix4fv(projLoc, 1, GL_FALSE, (float*)projection);
+				drawObject(world.objList[i], world.meshList, programIDMain, closest_src_list, count, player.camera);
+				//printf("hy\n");
+				free(closest_src_list);
+			}
+		} else {
+			glUseProgram(programIDLight);
+			glEnable(GL_DEPTH_TEST);
+			unsigned int TviewLoc  = glGetUniformLocation(programIDLight, "view");
+			unsigned int TprojLoc  = glGetUniformLocation(programIDLight, "projection");
+			glUniformMatrix4fv(TviewLoc, 1, GL_FALSE, (float*)player.camera.lookAt_mat);
+			glUniformMatrix4fv(TprojLoc, 1, GL_FALSE, (float*)projection);
+			drawObjectLight(world.objList[i], world.meshList, programIDLight);
 		}
-		glDisable(GL_DEPTH_TEST);
-		
-		//draw text
-		/* //we can change projection here or pass in win parameters to function
-		//glUseProgram(programIDTxt);	//cause of all my problems..., must call useprog b4 glEnabling and glUniformMatrixXfv, etc.
-		mat4 projectionFLAT;
-		glm_mat4_identity(projectionFLAT);
-		glm_ortho(0.0f, (float)window.wid, 0.0f, (float)window.high, 0.0f, 100.0f, projectionFLAT);
-		unsigned int projLoc2  = glGetUniformLocation(programIDTxt, "projection");
-		glUniformMatrix4fv(projLoc2, 1, GL_FALSE, (float*)projectionFLAT);
-		*/
-		
-		window.fps = (1.0f/window.dt);
+	}
+}
+
+void drawFPS(double prevTimePassed) {
+	window.fps = (1.0f/window.dt);
 		//printf("fps num is %d\n", window.fps);
 		const char tmpStr[] = "FPS: ";
 		///*
 		//printf("win: %f || prev: %f\n", window.time_passed, prevTimePassed);
 		if ((int)window.time_passed != (int)prevTimePassed)	{	//if (window.tick != (int) prevTimeTmp) {	//inaccurate, should count all frames every 11 ticks
 			//window.dtList[fps_tick_counter] = window.fps;
-			fps_tick_counter++;
+			window.fps_tick_counter++;
 		}
-		if (fps_tick_counter >= 1) {	//1/6 second has passed
-			//int sum = 0;
-			//for (int i = 0; i < 10; i++) {
-			//	sum += window.dtList[i];
-			//}
-			window.current_display_fps = frame_counter; //sum/10; //window.fps;
-			fps_tick_counter = 0;
-			frame_counter = 0;
+		if (window.fps_tick_counter >= 1) {	//1/6 second has passed
+			window.current_display_fps = window.frame_counter; //sum/10; //window.fps;
+			window.fps_tick_counter = 0;
+			window.frame_counter = 0;
 		}
 		
 		//int fps = (1.0f/window.dt);
@@ -519,8 +559,6 @@ void window_loop() {
 		int length = strlen(tmpStr) + tmpI;
 		char* FPS_counter = (char*) malloc(sizeof(char) * (length + 1));
 		strcpy(FPS_counter, tmpStr);
-		//FPS_counter[0] = 'F';	FPS_counter[1] = 'P';	FPS_counter[2] = 'S';
-		//FPS_counter[3] = ':';	FPS_counter[4] = ' ';
 		for (int i = length - 1; i >= strlen(tmpStr); i--) {
 			//printf("cond num is %ld\n", strlen(tmpStr) + tmpI);
 			FPS_counter[i] = '0' + rTmp % 10;	//ascii 0 offset added.
@@ -532,16 +570,6 @@ void window_loop() {
 		//printf("length of it is %ld\n", strlen(FPS_counter));
 		RenderText(programIDTxt, FPS_counter, strlen(tmpStr) + tmpI, window.wid - 315.0f, window.high - 80.0f, 1.0f, (vec3){1.0f, 1.0f, 1.0f}, window.wid, window.high);
 		
-		free(FPS_counter);
-		frame_counter++;
-		
-		//*/
-		
-		//printf("coords: %f, %f, %f\n", player.coords[0], player.coords[1], player.coords[2]);
-		//printf("theta: %f, phi %f\n", player.camera.theta, player.camera.phi);
-		glfwSwapBuffers(window.handle);
-	}
-
-	//glfwDestroyWindow(window.handle);
-	glfwTerminate();
+		free(FPS_counter);		// could consider not doing this every frame but will worry about later
+		window.frame_counter++;
 }

@@ -73,6 +73,7 @@ int loadFont() {
 
 void RenderText(unsigned int prgID, char* text, unsigned int textLength, float x, float y, float scale, vec3 color, float WinWidth, float Winheight) {
 	glUseProgram(prgID);
+	glDisable(GL_DEPTH_TEST);	// make sure you reenable after
 	mat4 projectionFLAT;
 	glm_mat4_identity(projectionFLAT);
 	glm_ortho(0.0f, WinWidth, 0.0f, Winheight, 0.0f, 100.0f, projectionFLAT);
@@ -125,5 +126,6 @@ void RenderText(unsigned int prgID, char* text, unsigned int textLength, float x
     //glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
 }
 //*/

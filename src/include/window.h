@@ -35,6 +35,9 @@ struct Window {
     unsigned long long int tick;
     double tick_float;
 
+    int fps_tick_counter;
+	int frame_counter;
+
     //last x and y coords of mouse
     float lastX;
     float lastY;
@@ -60,6 +63,9 @@ void get_resolution(int *width, int *high);
 void action_callback();
 void mouse_callback(GLFWwindow* handle, double xpos, double ypos);
 void window_loop();
+
+void drawAllObjects(bool shadowMode);
+void drawFPS(double prevTimePassed);
 
 // global window
 extern struct Window window;

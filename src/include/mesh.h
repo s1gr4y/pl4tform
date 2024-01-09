@@ -9,14 +9,21 @@
 #include "../include/shader.h"
 #include "../include/OBB.h"
 #include "../include/camera.h"
-
 #include "../include/obj_loader.h"
-
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
+extern unsigned int quadVAO;
+extern unsigned int quadVBO;
+
+extern unsigned int depthMapFBO;	//universal for the "sun"
+extern unsigned int depthMap;
+
+extern const unsigned int SHADOW_WIDTH;
+extern const unsigned int SHADOW_HEIGHT;
 
 typedef enum {
 	meshType_cube_simple = 0,
@@ -30,6 +37,7 @@ typedef struct Mesh {
 	//  render data
 	unsigned int VAO, VBO, EBO;
 	unsigned int textures[16];
+
 	// mesh data, all arrs
 	float *vertices;
 	int *indices;
@@ -72,5 +80,10 @@ void drawObjectLight(struct Object obj, struct Mesh* mList, unsigned int pID);
 void drawObjectSimple(struct Object obj, struct Mesh* mList, unsigned int pID);
 
 void ALTdrawObject(struct Object obj, unsigned int pID);
+
+void DrawQuad(unsigned int prgID);
+void setupQuadVAO_VBO();
+void generateDepthFBO();
+void renderDepthMap(Object lightSrc, unsigned int prgID);
 
 #endif

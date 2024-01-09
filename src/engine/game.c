@@ -179,21 +179,21 @@ void initWorld() {
 	GenerateGridMap(&world.gridMap, 50);
 
 	vec3 objPositions[] = {	//figure out game objects / collision / try triangle - done
-		{ 0.0f, 0.45f,  0.0f},
-		{ 0.0f, 1.0f, 0.0f},
+		{ 0.0f, 0.0f,  0.0f},	//{ 0.0f, 0.45f,  0.0f},
+		{ 0.0f, 1.5f, 0.0f},
 		{5.0f, 1.0f, 5.0f},
 		{-5.0f, 1.0f, 5.0f},
 		{5.0f, 1.0f, -5.0f}
 	};
 
-	addObj(meshType_cube_simple, NULL, false, false, objPositions[0], (vec3){20.0f, 0.1f, 20.0f}, (vec3){1.0f, 0.0f, 0.0f}, 0.0f, 0, NULL);
+	addObj(meshType_cube_simple, NULL, false, false, objPositions[0], (vec3){20.0f, 0.5f, 20.0f}, (vec3){1.0f, 0.0f, 0.0f}, 0.0f, 0, NULL);
 
 	for (int i = 1; i < 5; i++) {
 		//if (i % 2 == 0) {
 			//addObj(meshType_triangle, true, objPositions[i], (vec3){1.5f, 1.0f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, rand() % 91, i);
 		//} else {
 		if (i == 1) {
-			addObj(meshType_cube_simple, NULL, true, false, objPositions[i], (vec3){1.0f, 1.0f, 1.0f}, (vec3){0.0f, 1.0f, 0.0f}, 45.0f, i, NULL);
+			addObj(meshType_cube_simple, NULL, true, false, objPositions[i], (vec3){1.0f, 1.0f, 1.0f}, (vec3){1.0f, 0.0f, 0.0f}, 45.0f, i, NULL);
 		} else {
 			vec3 tmp = {0.0f, 0.1f, 0.0f};
 			glm_vec3_add(tmp, objPositions[i], objPositions[i]);
@@ -205,19 +205,19 @@ void initWorld() {
 	addObj(meshType_cube_simple, NULL, true, false, (vec3){-5.5f, 0.8f, -3.5f}, (vec3){3.2f, 1.0f, 3.2f}, (vec3){1.0f, 0.0f, 0.0f}, 45.0f, 5, &updateObjVelFuncXZCircle);
 	
 	//add light source.
-	addObj(meshType_cube_light, NULL, true, true, (vec3){0.0f, 4.0f, 0.0f}, (vec3){1.2f, 1.2f, 1.2f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 6, NULL);
+	addObj(meshType_cube_light, NULL, true, true, (vec3){-2.0f, 4.0f, 1.0f}, (vec3){1.2f, 1.2f, 1.2f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 6, NULL);
 	
 	//another light source.
-	addObj(meshType_cube_light, NULL, true, true, (vec3){10.0f, -1.0f, 10.0f}, (vec3){3.0f, 1.0f, 3.0f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 7, &updateObjVelFuncVertical);
+	//addObj(meshType_cube_light, NULL, true, true, (vec3){10.0f, -1.0f, 10.0f}, (vec3){3.0f, 1.0f, 3.0f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 7, &updateObjVelFuncVertical);
 	
 	//extra
-	int res = addObj(meshType_cube_simple, NULL, true, false, (vec3){12.0f, 1.0f, 1.0f}, (vec3){1.5f, 1.50f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 8, &updateObjVelFuncXZCircle);
-	printf("double checking res is %d\n", res);
+	int res = addObj(meshType_cube_simple, NULL, true, false, (vec3){4.5f, 1.5f, 1.0f}, (vec3){1.5f, 1.50f, 1.5f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 8, NULL);
+	//printf("double checking res is %d\n", res);
 	//world.objList[8].lightSrc = false;
 
 	//extra
-	addObj(meshType_OBJ_light, "Resources/Models/xyzrgb_dragon.obj", true, false, (vec3){0.0f, 1.0f, 7.0f}, (vec3){0.02f, 0.02f, 0.02f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 9, NULL);
-	world.objList[9].hasCollision = false;
+	addObj(meshType_OBJ_light, "Resources/Models/teapot.obj", true, false, (vec3){0.0f, 0.7f, 7.0f}, (vec3){0.2f, 0.2f, 0.2f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 9, NULL);
+	world.objList[8].hasCollision = false;
 	
 	checkObjList(&player);
 }

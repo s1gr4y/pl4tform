@@ -24,6 +24,12 @@ extern const char *fragmentShaderSrc_Minimal;
 extern const char *vertexShaderSrc_NoTexture;
 extern const char *fragmentShaderSrc_NoTexture;
 
+extern const char *vertexShaderSrc_Depth;
+extern const char *fragmentShaderSrc_Depth;
+
+extern const char *vertexShaderSrc_DepthQuad;
+extern const char *fragmentShaderSrc_DepthQuad;
+
 // vars to compile and link shaders
 extern unsigned int vs1, fs1;				//vertex, fragment shader
 
@@ -33,6 +39,8 @@ extern unsigned int programIDTxt;
 extern unsigned int programIDLight;
 extern unsigned int programIDSimple;
 extern unsigned int programIDNoTexture;
+extern unsigned int programIDDepthShader;
+extern unsigned int programIDDepthQuadShader;
 
 //void loadShaders(const char* vsSource, const char* fsSource);
 void loadShaders(const char* vsSource, const char* fsSource, unsigned int* programID);
