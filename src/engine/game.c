@@ -216,8 +216,8 @@ void initWorld() {
 	//world.objList[8].lightSrc = false;
 
 	//extra
-	addObj(meshType_OBJ_light, "Resources/Models/teapot.obj", true, false, (vec3){0.0f, 0.7f, 7.0f}, (vec3){0.2f, 0.2f, 0.2f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 9, NULL);
-	world.objList[8].hasCollision = false;
+	//addObj(meshType_OBJ_light, "Resources/Models/teapot.obj", true, false, (vec3){-1.0f, 0.4f, 1.0f}, (vec3){0.2f, 0.2f, 0.2f}, (vec3){0.0f, 1.0f, 0.0f}, 0.0f, 9, NULL);
+	//world.objList[8].hasCollision = false;
 	
 	checkObjList(&player);
 }

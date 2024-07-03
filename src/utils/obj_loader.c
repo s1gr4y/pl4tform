@@ -193,7 +193,7 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
         }   //otherwise ignore
     }
 
-    printf("here3?\n");
+    //printf("here3?\n");
 
     ///*
     int indexer = 0;    // need another 'i' since we only have 3 vals per vertex normal
@@ -217,7 +217,7 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
     }
     *dataSize = (unsigned)vertex_count*increment;
 
-    printf("here4?\n");
+    //printf("here4?\n");
 
     // calculate normals
     for (unsigned int i = 0; i < face_count*3; i += 3) {    //bc obj starts at 1
@@ -302,6 +302,6 @@ void readObjFile(char path[], int path_length, float** data, unsigned int* dataS
     free(faces);
 
     fclose(fReader.f_ptr);
-    printf("end\n");
+    //printf("end\n");
     //return vertices;
 }

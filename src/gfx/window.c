@@ -445,7 +445,7 @@ void window_loop() {
 
 		//DrawQuad(programIDDepthQuadShader);	// for testing
 
-		//drawFPS(prevTimePassed);
+		drawFPS(prevTimePassed);
 		
 		//*/
 		
