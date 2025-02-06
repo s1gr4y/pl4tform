@@ -1,10 +1,10 @@
-# pl4tform (beta/WIP)
+# pl4tform (Archived)
 
-A simple 3D platforming game made in C and OpenGL. It is expected that the gameplay will play similar to a basic platformer with nice movement.
+A simple 3D game engine in C and OpenGL. This is a test-bed for alternate build tools with not too many dependencies while learning OpenGL and 3d graphics. I use a modified version of this engine for some of other projects. This repo will likely not be updated until I feel comfortable and/or have free time.
 
 ### Preview
 
-![thumbnail](README_imgs/prev_with_text.png)
+![thumbnail](README_imgs/pl4tf0rm_demo.png)
 
 ### Current Features
 - Movement in the ground/air and on moving objects
